@@ -23,6 +23,7 @@
 - **資料夾檢視**：把整個資料夾拖進 Chrome 的一般分頁（不要拖到 `chrome://extensions`，那裡會被當成安裝擴充；或開 `file:///C:/docs/` 這類網址），會看到可搜尋的 Markdown 檔列表，打字篩選、`↑` `↓` 選擇、`Enter` 開啟。勾選「搜尋檔案內容」還能搜尋這個資料夾（含三層子資料夾）裡所有 Markdown 檔的內文。
 - **編輯模式**：`Alt+Shift+E` 開啟左右分割的編輯器，右邊即時預覽；`Ctrl+S` 存檔（第一次會跳出「另存新檔」，選同一個檔案覆蓋）。上方有格式工具列（粗體、清單、表格等，`Ctrl+B` / `Ctrl+I` / `Ctrl+K`）；貼上圖片時會請你把圖檔存在文件旁邊，並自動插入圖片語法。
 - **插件與參數設定**：Emoji、上下標、目錄 TOC、數學公式 KaTeX、Mermaid、腳註、任務列表、提示框、表格擴展、元數據 frontmatter 等，可個別開關，並用 ⚙ 以 JSON 調整參數；也能一鍵全開 / 全關。
+- **設定檔**：設定頁最下方可以「把設定存成檔案」（JSON），換電腦時再「從檔案還原」。檔案裡只有設定（主題、插件與參數、額外檔案類型、閱讀設定、自訂 CSS 等），不含最近開過的檔案；允許過的網站也不在裡面，要在新電腦上重新允許。還原時只採用認得、格式正確的項目，其他會列出並略過。
 - **自動刷新**：檔案在其他編輯器存檔後，頁面自動更新。
 - **最近開過的檔案**：工具列 popup 會列出最近開過的檔案（只存在本機，可在設定頁關閉）。
 - **複製段落連結**：滑到標題上會出現 `#`，點一下就複製連到該段落的網址。
@@ -109,26 +110,27 @@ AnyRead MD 有自己的版本號，從 1.0.0 起算，採 [語意化版本](http
 
 ## 專案結構
 
-| 路徑                     | 內容                                                  |
-| ------------------------ | ----------------------------------------------------- |
-| `src/main.ts`            | Markdown 頁面的主程式（渲染、側邊欄、按鈕、自動刷新） |
-| `src/core/markdown.ts`   | markdown-it 設定、插件與參數、frontmatter             |
-| `src/core/files.ts`      | 側邊欄「檔案」分頁的資料夾樹                          |
-| `src/dir-frame.ts`       | 讀取 Chrome 的 `file://` 資料夾列表；資料夾檢視頁     |
-| `src/core/editor.ts`     | 編輯模式與存檔                                        |
-| `src/core/preview.ts`    | 連結的 Markdown 檔在右半邊開啟                        |
-| `src/core/table.ts`      | CSV / TSV 解析、編碼判斷                              |
-| `src/core/xlsx.ts`       | 讀取 Excel `.xlsx`（不需套件）                        |
-| `src/table/`             | CSV / Excel 表格頁（含下載）                          |
-| `src/core/export.ts`     | 匯出 PDF / HTML                                       |
-| `src/core/web-access.ts` | 網站存取權限（使用者自己開啟）                        |
-| `tests/`                 | 單元測試（`pnpm test`）                               |
-| `src/core/tour.ts`       | 第一次開啟時的導覽                                    |
-| `src/core/runtime.ts`    | 擴充更新後，已開分頁的斷線處理                        |
-| `src/options/`           | 進階設定頁、歡迎頁                                    |
-| `src/popup/`             | 工具列 popup                                          |
-| `scripts/pack-share.mjs` | 打包分享用 zip                                        |
-| `share/安裝說明.txt`     | 放進 zip 的中文安裝說明                               |
+| 路徑                        | 內容                                                  |
+| --------------------------- | ----------------------------------------------------- |
+| `src/main.ts`               | Markdown 頁面的主程式（渲染、側邊欄、按鈕、自動刷新） |
+| `src/core/markdown.ts`      | markdown-it 設定、插件與參數、frontmatter             |
+| `src/core/files.ts`         | 側邊欄「檔案」分頁的資料夾樹                          |
+| `src/dir-frame.ts`          | 讀取 Chrome 的 `file://` 資料夾列表；資料夾檢視頁     |
+| `src/core/editor.ts`        | 編輯模式與存檔                                        |
+| `src/core/preview.ts`       | 連結的 Markdown 檔在右半邊開啟                        |
+| `src/core/table.ts`         | CSV / TSV 解析、編碼判斷                              |
+| `src/core/settings-file.ts` | 設定檔的匯出、匯入檢查                                |
+| `src/core/xlsx.ts`          | 讀取 Excel `.xlsx`（不需套件）                        |
+| `src/table/`                | CSV / Excel 表格頁（含下載）                          |
+| `src/core/export.ts`        | 匯出 PDF / HTML                                       |
+| `src/core/web-access.ts`    | 網站存取權限（使用者自己開啟）                        |
+| `tests/`                    | 單元測試（`pnpm test`）                               |
+| `src/core/tour.ts`          | 第一次開啟時的導覽                                    |
+| `src/core/runtime.ts`       | 擴充更新後，已開分頁的斷線處理                        |
+| `src/options/`              | 進階設定頁、歡迎頁                                    |
+| `src/popup/`                | 工具列 popup                                          |
+| `scripts/pack-share.mjs`    | 打包分享用 zip                                        |
+| `share/安裝說明.txt`        | 放進 zip 的中文安裝說明                               |
 
 ## 隱私
 

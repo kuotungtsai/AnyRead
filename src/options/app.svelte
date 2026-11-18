@@ -18,6 +18,12 @@
     requestSites,
   } from '@/core/web-access'
   import { clearRecent } from '@/core/recent'
+  import PAGE_THEMES from '@/config/page-themes'
+  import {
+    exportSettings,
+    readSettingsFile,
+    settingsFileName,
+  } from '@/core/settings-file'
 
   let localize = i18n()
 
@@ -138,24 +144,75 @@
   ]
   $: allOn = enabled.length === MD_PLUGINS.length
 
-  storage.get().then(raw => {
-    const data = getDefaultData(raw)
-    localize = i18n(data.language)
-    config = data.mdConfig
-    enabled = [...data.mdPlugins]
-    codeExts = sanitizeExts(data.codeExts)
-    codeExtsText = codeExts.join(', ')
-    reading = data.reading
-    customCss = data.customCss || ''
-    linkPreview = data.linkPreview !== false
-    recentOn = data.recentOn !== false
-    texts = Object.fromEntries(
-      CONFIGURABLE.map(name => {
-        const opts = config.plugins[name]
-        return [name, opts && Object.keys(opts).length ? JSON.stringify(opts, null, 2) : '']
-      }),
-    )
-  })
+  function load() {
+    return storage.get().then(raw => {
+      const data = getDefaultData(raw)
+      localize = i18n(data.language)
+      config = data.mdConfig
+      enabled = [...data.mdPlugins]
+      codeExts = sanitizeExts(data.codeExts)
+      codeExtsText = codeExts.join(', ')
+      reading = data.reading
+      customCss = data.customCss || ''
+      linkPreview = data.linkPreview !== false
+      recentOn = data.recentOn !== false
+      texts = Object.fromEntries(
+        CONFIGURABLE.map(name => {
+          const opts = config.plugins[name]
+          return [name, opts && Object.keys(opts).length ? JSON.stringify(opts, null, 2) : '']
+        }),
+      )
+    })
+  }
+  load()
+
+  /* settings file: save to / restore from a JSON file */
+  let importInput: HTMLInputElement
+  let importMessage = ''
+  let importError = false
+
+  async function exportFile() {
+    const raw: any = await new Promise(resolve => chrome.storage.local.get(null, resolve))
+    const file = exportSettings(raw || {}, chrome.runtime.getManifest().version)
+    const blob = new Blob([JSON.stringify(file, null, 2) + '\n'], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = settingsFileName()
+    document.body.append(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+  }
+
+  async function importFile(e: Event) {
+    const input = e.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = '' // the same file can be chosen again
+    if (!file) return
+    importMessage = ''
+    let result: ReturnType<typeof readSettingsFile>
+    try {
+      result = readSettingsFile(await file.text(), {
+        languages: i18n.locales,
+        themes: PAGE_THEMES,
+        plugins: MD_PLUGINS,
+        configurable: CONFIGURABLE,
+      })
+    } catch {
+      importError = true
+      importMessage = localize('opt_import_bad')
+      return
+    }
+    if (!confirm(localize('opt_import_confirm'))) return
+    // the saved plugin list is final: no plugins added by a newer build
+    await storage.set({ ...result.settings, pluginsMigrated: true } as any)
+    await load()
+    importError = false
+    importMessage = localize('opt_import_done').replace('{count}', String(Object.keys(result.settings).length))
+    if (result.skipped.length) {
+      importMessage += ` ${localize('opt_import_skipped')}: ${result.skipped.join(', ')}`
+    }
+  }
 
   function flash(text: string) {
     status = text
@@ -461,6 +518,25 @@
       >
     </div>
   </section>
+
+  <section class="file-types settings-file">
+    <h2>{localize('opt_settings_file')}</h2>
+    <div class="desc">{localize('opt_settings_file_desc')}</div>
+    <div class="buttons">
+      <button class="apply" on:click={exportFile}>{localize('opt_export')}</button>
+      <button class="apply" on:click={() => importInput.click()}>{localize('opt_import')}</button>
+      <input
+        bind:this={importInput}
+        type="file"
+        accept=".json,application/json"
+        hidden
+        on:change={importFile}
+      />
+    </div>
+    {#if importMessage}
+      <div class="desc import-message" class:invalid={importError}>{importMessage}</div>
+    {/if}
+  </section>
 </main>
 
 <style>
@@ -667,6 +743,16 @@
   .reset {
     color: #607cd2;
     background: #fff;
+  }
+  .settings-file .buttons {
+    display: flex;
+    gap: 8px;
+  }
+  .import-message {
+    margin-top: 8px;
+  }
+  .import-message.invalid {
+    color: #d1242f;
   }
   footer {
     margin-top: 16px;

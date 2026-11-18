@@ -25,6 +25,7 @@ const MODULES = [
   'reading-config',
   'table',
   'xlsx',
+  'settings-file',
 ]
 
 fs.rmSync(out, { recursive: true, force: true })

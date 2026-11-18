@@ -1,0 +1,161 @@
+// The table page. Light and dark follow the reader's theme setting.
+:root {
+  --bg: #fff;
+  --fg: #1f2328;
+  --muted: #656d76;
+  --line: #d0d7de;
+  --head: #f6f8fa;
+  --stripe: #f9fafb;
+  --hover: #eef4ff;
+  --accent: #0969da;
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  --bg: #0d1117;
+  --fg: #e6edf3;
+  --muted: #8d96a0;
+  --line: #30363d;
+  --head: #161b22;
+  --stripe: #11161d;
+  --hover: #1c2a3f;
+  --accent: #4493f8;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 -apple-system, 'Segoe UI', 'Noto Sans', 'Microsoft JhengHei',
+    sans-serif;
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--head);
+}
+.name {
+  font-weight: 600;
+  font-size: 16px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.spacer {
+  flex: 1;
+}
+button {
+  padding: 5px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 20px;
+  color: var(--fg);
+}
+.anyread-sheet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 10px;
+  button {
+    padding: 3px 12px;
+    font-size: 13px;
+    &.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+  }
+}
+.anyread-sheet {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.anyread-table-info {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+.anyread-table-wrap {
+  // as tall as the table, scrolling inside once it fills the window
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.anyread-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  th,
+  td {
+    padding: 5px 10px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    white-space: pre-wrap;
+    vertical-align: top;
+    max-width: 480px;
+    text-align: left;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--head);
+    font-weight: 600;
+  }
+  tbody tr:nth-child(even) td {
+    background: var(--stripe);
+  }
+  tbody tr:hover td {
+    background: var(--hover);
+  }
+  .anyread-table-num {
+    width: 1%;
+    white-space: nowrap;
+    position: sticky;
+    left: 0;
+    color: var(--muted);
+    background: var(--head);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+  thead .anyread-table-num {
+    z-index: 2;
+  }
+  .anyread-table-number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

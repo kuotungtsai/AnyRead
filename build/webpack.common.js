@@ -13,6 +13,7 @@ module.exports = {
     popup: resolve(__dirname, '../src/popup/index.ts'),
     options: resolve(__dirname, '../src/options/index.ts'),
     'dir-frame': resolve(__dirname, '../src/dir-frame.ts'),
+    table: resolve(__dirname, '../src/table/index.ts'),
   },
   output: {
     filename: 'js/[name].js',
@@ -116,6 +117,10 @@ module.exports = {
         {
           from: resolve(__dirname, '../src/options/index.html'),
           to: 'options.html',
+        },
+        {
+          from: resolve(__dirname, '../src/table/index.html'),
+          to: 'table.html',
         },
         {
           // MIT license must travel with every copy of the extension

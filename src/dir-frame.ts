@@ -10,7 +10,8 @@
  */
 import storage from '@/core/storage'
 import i18n from '@/config/i18n'
-import { isMarkdownName, viewableMatcher } from '@/core/file-types'
+import { isMarkdownName, isTableName, viewableMatcher } from '@/core/file-types'
+import { openTablePage } from '@/core/table-open'
 import { listDir } from '@/core/files'
 import { findMatches, type Match } from '@/core/search'
 
@@ -317,12 +318,30 @@ async function topMode() {
           class: ['mdr-dir-item', 'mdr-md', 'mdr-code', 'mdr-other'][k],
         })
         const a = el('a', { href: e.url, title: e.name })
+        const table = !e.isDir && isTableName(e.name)
         a.append(
-          el('span', { class: 'mdr-icon' }, ['📁', '📝', '📃', '📄'][k]),
+          el(
+            'span',
+            { class: 'mdr-icon' },
+            table ? '📊' : ['📁', '📝', '📃', '📄'][k],
+          ),
           el('span', { class: 'mdr-name' }, e.name),
           el('span', { class: 'mdr-meta size' }, e.isDir ? '' : e.size || ''),
           el('span', { class: 'mdr-meta date' }, e.date || ''),
         )
+        if (table) {
+          // Chrome would only download a CSV file: show it as a table
+          a.addEventListener('click', ev => {
+            if (ev.shiftKey || ev.altKey) return
+            ev.preventDefault()
+            openTablePage(e.url, ev.ctrlKey || ev.metaKey)
+          })
+          a.addEventListener('auxclick', ev => {
+            if (ev.button !== 1) return
+            ev.preventDefault()
+            openTablePage(e.url, true)
+          })
+        }
         li.append(a)
         list.append(li)
       })
@@ -357,7 +376,9 @@ async function topMode() {
         highlight()
       } else if (e.key === 'Enter' && links[selected]) {
         e.preventDefault()
-        location.href = (links[selected] as HTMLAnchorElement).href
+        const href = (links[selected] as HTMLAnchorElement).href
+        if (isTableName(href)) openTablePage(href, e.ctrlKey || e.metaKey)
+        else location.href = href
       } else if (
         e.key.length === 1 &&
         !e.ctrlKey &&

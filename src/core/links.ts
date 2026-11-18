@@ -1,5 +1,6 @@
 /** Pure helpers for links between Markdown files (no DOM, easy to test). */
-import { isMarkdownName } from './file-types'
+import { isDiagramName, isMarkdownName } from './file-types'
+import { isTableName } from './table'
 
 const stripHash = (url: string) => url.split('#')[0]
 
@@ -72,10 +73,16 @@ export function sameSite(target: URL, from: URL): boolean {
 }
 
 /**
- * The Markdown file a link points to, or null when the link should behave
- * normally (another site, not Markdown, or just an anchor in the same file).
+ * The Markdown, table (CSV, Excel) or text file a link points to, or null
+ * when the link should behave normally (another site, another kind of file,
+ * or just an anchor in the same file). `isText` says which other names are
+ * text the pane can show (.txt, the user's code types).
  */
-export function previewTarget(href: string, base: string): string | null {
+export function previewTarget(
+  href: string,
+  base: string,
+  isText: (name: string) => boolean = () => false,
+): string | null {
   let url: URL
   let from: URL
   try {
@@ -84,7 +91,14 @@ export function previewTarget(href: string, base: string): string | null {
   } catch {
     return null
   }
-  if (!isMarkdownName(url.pathname)) return null
+  const name = url.pathname
+  if (
+    !isMarkdownName(name) &&
+    !isDiagramName(name) &&
+    !isTableName(name) &&
+    !isText(name)
+  )
+    return null
   if (!sameSite(url, from)) return null
   if (stripHash(url.href) === stripHash(from.href)) return null
   return url.href

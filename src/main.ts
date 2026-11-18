@@ -12,7 +12,10 @@ import { createFileTree, isFileProtocol } from '@/core/files'
 import {
   codeLanguage,
   fileName,
+  isDiagramName,
+  isMarkdownName,
   sanitizeExts,
+  textMatcher,
   toCodeFence,
   urlExtension,
   viewableMatcher,
@@ -37,7 +40,9 @@ import goTopIcon from '@/images/icon_go_top.svg'
 import editIcon from '@/images/icon_edit.svg'
 import exportIcon from '@/images/icon_export.svg'
 import { createLinkPreview } from '@/core/preview'
-import { headingIndex, previewTarget } from '@/core/links'
+import { openTablePage } from '@/core/table-open'
+import { headingIndex, previewTarget, sameSite } from '@/core/links'
+import { isTableName } from '@/core/table'
 import { exportHtml, printPage } from '@/core/export'
 import { applyCustomCss, applyReading } from '@/core/reading'
 import { rememberPage } from '@/core/recent'
@@ -88,9 +93,12 @@ function main(data: Data) {
   /* a file type the user added in the options page: show it as one
      highlighted code block instead of parsing it as markdown */
   const fileExt = urlExtension(location.href)
-  const codeLang = sanitizeExts(configData.codeExts).includes(fileExt)
-    ? codeLanguage(fileExt)
-    : null
+  /* a Mermaid file (.mmd): the whole file is one diagram */
+  const diagram = isDiagramName(location.href)
+  const codeLang =
+    !diagram && sanitizeExts(configData.codeExts).includes(fileExt)
+      ? codeLanguage(fileExt)
+      : null
   /* VS Code colours (Shiki) when there is a grammar for it, else highlight.js */
   const viewLang = codeLang ? codeViewLanguage(fileExt) : null
 
@@ -103,6 +111,12 @@ function main(data: Data) {
     showPage() // not ours: show the text as Chrome does
     return
   }
+
+  /* a .mmd file is drawn even when the Mermaid plugin is switched off */
+  const withMermaid = () =>
+    configData.mdPlugins.includes('Mermaid')
+      ? configData.mdPlugins
+      : [...configData.mdPlugins, 'Mermaid']
 
   let pollingTimer: number = null
   onStale(() => clearTimeout(pollingTimer))
@@ -143,18 +157,20 @@ function main(data: Data) {
         target.innerHTML = renderCodeView(code ?? '', viewLang)
       } else {
         if (codeLang) code = toCodeFence(code ?? '', codeLang)
+        if (diagram) code = toCodeFence(code ?? '', 'mermaid')
         target.innerHTML = mdRender(code, {
           theme: toTheme(configData.pageTheme),
-          plugins: configData.mdPlugins,
+          plugins: diagram ? withMermaid() : configData.mdPlugins,
           config: mdConfig.core,
           pluginOptions: mdConfig.plugins,
           ...options,
         })
       }
       const ele = target instanceof Ele ? target.ele : target
-      document.title = codeLang
-        ? fileName(location.pathname)
-        : ele.querySelector('h1')?.textContent.trim() ?? ''
+      document.title =
+        codeLang || diagram
+          ? fileName(location.pathname)
+          : ele.querySelector('h1')?.textContent.trim() ?? ''
       editor?.syncTitle()
       globalEvent.emit(
         'contentRendered',
@@ -198,6 +214,8 @@ function main(data: Data) {
   applyReading(mdContent.ele, configData.reading)
   applyCustomCss(configData.customCss)
 
+  /* .txt and the user's code types also open in the pane */
+  const paneText = textMatcher(configData.codeExts)
   /* a link to another Markdown file opens in a pane on the right */
   const preview = createLinkPreview({
     labels: {
@@ -210,12 +228,29 @@ function main(data: Data) {
       resize: localize('preview_resize'),
       loading: localize('preview_loading'),
       error: localize('preview_error'),
+      table: {
+        size: localize('table_size'),
+        truncated: localize('table_truncated'),
+        empty: localize('table_empty'),
+      },
     },
-    render(target, source) {
+    isText: name => paneText(name),
+    render(target, source, file) {
       const mdConfig = getDefaultMdConfig(configData.mdConfig)
+      // a diagram, or a text / code file shown as one block, like their own page
+      const isDiagram = isDiagramName(file)
+      if (isDiagram) {
+        source = toCodeFence(source, 'mermaid')
+      } else if (!isMarkdownName(file)) {
+        const ext = urlExtension(file)
+        source = toCodeFence(
+          source,
+          ext === 'txt' ? 'plaintext' : codeLanguage(ext),
+        )
+      }
       target.innerHTML = mdRender(source, {
         theme: toTheme(configData.pageTheme),
-        plugins: configData.mdPlugins,
+        plugins: isDiagram ? withMermaid() : configData.mdPlugins,
         config: mdConfig.core,
         pluginOptions: mdConfig.plugins,
       })
@@ -256,10 +291,23 @@ function main(data: Data) {
         !e.shiftKey &&
         !e.altKey
       ) {
-        const url = previewTarget(link.getAttribute('href'), location.href)
+        const url = previewTarget(
+          link.getAttribute('href'),
+          location.href,
+          paneText,
+        )
         if (url) {
           e.preventDefault()
           preview.open(url)
+          return
+        }
+      }
+      // a CSV file outside the pane: Chrome would only download it
+      if (link && e.button === 0 && !e.shiftKey && !e.altKey) {
+        const csv = tableLink(link as HTMLAnchorElement)
+        if (csv) {
+          e.preventDefault()
+          openTablePage(csv, e.ctrlKey || e.metaKey)
           return
         }
       }
@@ -267,6 +315,15 @@ function main(data: Data) {
     },
     true,
   )
+  // middle click on a CSV link: the table page in a new tab
+  mdContent.on('auxclick', (e: MouseEvent) => {
+    const link = (e.target as HTMLElement).closest?.('a[href]')
+    const csv = e.button === 1 && link && tableLink(link as HTMLAnchorElement)
+    if (csv) {
+      e.preventDefault()
+      openTablePage(csv, true)
+    }
+  })
 
   let toastTimer: number = null
   const toastEle = new Ele<HTMLElement>('div', { className: className.TOAST })
@@ -794,6 +851,18 @@ function isTextDocument(): boolean {
 }
 
 /** lift the style that hides the raw text while the reader loads */
+/** a link to a CSV file this page may read (local, or on the same site) */
+function tableLink(link: HTMLAnchorElement): string | null {
+  try {
+    const url = new URL(link.href)
+    return isTableName(url.pathname) && sameSite(url, new URL(location.href))
+      ? url.href
+      : null
+  } catch {
+    return null
+  }
+}
+
 function showPage() {
   document.documentElement.classList.add('anyread-ready')
 }

@@ -1,6 +1,6 @@
 {
   "name": "__MSG_ext_name__",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "Gordon Tsai (based on md-reader by Bener, MIT)",
   "manifest_version": 3,
   "description": "__MSG_ext_desc__",
@@ -53,7 +53,15 @@
         "file://*/*.MD?*",
         "file://*/*.MDX?*",
         "file://*/*.MKD?*",
-        "file://*/*.MARKDOWN?*"
+        "file://*/*.MARKDOWN?*",
+        "file://*/*.mmd",
+        "file://*/*.mmd?*",
+        "file://*/*.mermaid",
+        "file://*/*.mermaid?*",
+        "file://*/*.MMD",
+        "file://*/*.MMD?*",
+        "file://*/*.MERMAID",
+        "file://*/*.MERMAID?*"
       ]
     },
     {

@@ -1,14 +1,27 @@
 import storage from '@/core/storage'
 import commands from '@/core/commands'
 import {
+  DIAGRAM_EXTS,
   MD_EXTS,
+  isDiagramName,
   isMarkdownName,
   matchPatterns,
   patternsFor,
   sanitizeExts,
+  textMatcher,
   webBases,
 } from '@/core/file-types'
 import { sameSite } from '@/core/links'
+import {
+  decodeText,
+  isTableName,
+  isWorkbookName,
+  tablePageUrl,
+} from '@/core/table'
+import { readXlsx } from '@/core/xlsx'
+
+/** rows of each Excel sheet sent to the pane (it shows 1000) */
+const PANE_SHEET_ROWS = 1001
 
 chrome.runtime.onMessage.addListener(({ action, data }, sender, callback) => {
   messageHandler(action, data, sender, callback)
@@ -32,6 +45,9 @@ async function messageHandler(
       break
     case 'readFile':
       readFile(data?.url, sender.url).then(callback)
+      break
+    case 'openTable':
+      openTable(data?.url, !!data?.newTab, sender).then(callback)
       break
     case 'readImage':
       readImage(data?.url, sender.url).then(callback)
@@ -58,24 +74,82 @@ async function fetchData(url?: string) {
 }
 
 /**
- * Read another Markdown file for a page that is already being shown:
- * the linked-file preview and the folder search. A local page may read local
- * Markdown files; a web page may read Markdown files on its own site.
+ * Read another file for a page that is already being shown: the linked-file
+ * preview and the folder search. Markdown, tables (CSV, Excel), .txt and the
+ * user's code types only. A local page may read local files; a web page may
+ * read files on its own site.
  */
 async function readFile(
   url?: string,
   from?: string,
-): Promise<{ ok: boolean; text?: string }> {
+): Promise<{
+  ok: boolean
+  text?: string
+  sheets?: { name: string; rows: string[][]; total: number }[]
+}> {
   try {
     const target = new URL(url)
     const origin = new URL(from)
-    if (!sameSite(target, origin) || !isMarkdownName(target.pathname))
+    const name = target.pathname
+    const table = isTableName(name)
+    const plain =
+      !table &&
+      !isMarkdownName(name) &&
+      textMatcher((await storage.get('codeExts')).codeExts)(name)
+    const doc = isMarkdownName(name) || isDiagramName(name)
+    if (!sameSite(target, origin) || !(table || plain || doc))
       return { ok: false }
     const res = await fetch(target.href.split('#')[0])
     if (!res.ok && res.status !== 0) return { ok: false }
-    return { ok: true, text: await res.text() }
+    if (isWorkbookName(target.pathname)) {
+      const sheets = await readXlsx(await res.arrayBuffer())
+      return {
+        ok: true,
+        sheets: sheets.map(s => ({
+          name: s.name,
+          rows: s.rows.slice(0, PANE_SHEET_ROWS),
+          total: s.rows.length,
+        })),
+      }
+    }
+    // CSV and old text files are often in the local encoding (Big5, Shift_JIS...)
+    const text =
+      table || plain
+        ? decodeText(await res.arrayBuffer(), chrome.i18n.getUILanguage())
+        : await res.text()
+    return { ok: true, text }
   } catch {
     return { ok: false }
+  }
+}
+
+/**
+ * Show a CSV file on the extension's table page. Chrome would download it,
+ * so links to one go through here instead: in this tab, or in a new tab
+ * next to it.
+ */
+async function openTable(
+  url: string,
+  newTab: boolean,
+  sender: chrome.runtime.MessageSender,
+): Promise<boolean> {
+  try {
+    const target = new URL(url)
+    if (!/^(file|https?):$/.test(target.protocol)) return false
+    if (!isTableName(target.pathname)) return false
+    const page = tablePageUrl(chrome.runtime.getURL(''), target.href)
+    const tab = sender.tab
+    if (!newTab && tab?.id !== undefined) {
+      await chrome.tabs.update(tab.id, { url: page })
+    } else {
+      await chrome.tabs.create({
+        url: page,
+        ...(tab ? { index: tab.index + 1, openerTabId: tab.id } : {}),
+      })
+    }
+    return true
+  } catch {
+    return false
   }
 }
 
@@ -186,7 +260,10 @@ function syncScripts(exts?: unknown) {
     try {
       if (exts === undefined) exts = (await storage.get('codeExts')).codeExts
       const bases = await grantedWebBases()
-      await replaceScript(WEB_SCRIPT_ID, patternsFor(MD_EXTS, bases))
+      await replaceScript(
+        WEB_SCRIPT_ID,
+        patternsFor([...MD_EXTS, ...DIAGRAM_EXTS], bases),
+      )
       await replaceScript(
         CODE_SCRIPT_ID,
         matchPatterns(sanitizeExts(exts), bases),

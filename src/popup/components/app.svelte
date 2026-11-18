@@ -7,6 +7,7 @@
   import { getDefaultData, type Data } from '@/core/data'
   import i18n from '@/config/i18n'
   import {
+    DIAGRAM_EXTS,
     MD_EXTS,
     originPattern,
     sanitizeExts,
@@ -51,7 +52,11 @@
       const tab = tabs[0]
       const pattern = tab?.url ? originPattern(tab.url) : null
       if (!pattern) return
-      const viewable = [...MD_EXTS, ...sanitizeExts(data.codeExts)]
+      const viewable = [
+        ...MD_EXTS,
+        ...DIAGRAM_EXTS,
+        ...sanitizeExts(data.codeExts),
+      ]
       if (!viewable.includes(urlExtension(tab.url))) return
       if (await hasSite(pattern)) return
       sitePattern = pattern

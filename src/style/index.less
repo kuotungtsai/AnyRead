@@ -727,6 +727,59 @@ body.md-reader {
           translate: none;
         }
       }
+      /* a CSV or Excel file in the pane */
+      .anyread-sheet-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 0 0 12px;
+        button {
+          padding: 3px 10px;
+          border: 1px solid var(--color-side-border);
+          border-radius: 6px;
+          font-size: 12px;
+          color: var(--color-text-primary);
+          background: var(--color-bg);
+          cursor: pointer;
+          &.active {
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            font-weight: 600;
+          }
+        }
+      }
+      .anyread-table-info {
+        margin: 0 0 12px;
+        font-size: 13px;
+        opacity: 0.75;
+      }
+      .anyread-table-wrap {
+        overflow-x: auto;
+      }
+      .anyread-table {
+        display: table;
+        width: max-content;
+        min-width: 100%;
+        max-width: none;
+        margin: 0;
+        td,
+        th {
+          min-width: 0;
+          white-space: pre-wrap;
+          vertical-align: top;
+        }
+        .anyread-table-num {
+          width: 1%;
+          white-space: nowrap;
+          opacity: 0.6;
+          text-align: right;
+          user-select: none;
+        }
+        .anyread-table-number {
+          text-align: right;
+          font-variant-numeric: tabular-nums;
+        }
+      }
     }
   }
   .md-reader__preview-resizer {

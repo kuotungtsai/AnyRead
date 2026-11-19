@@ -43,7 +43,7 @@ import closeIcon from '@/images/icon_close.svg'
 import { createLinkPreview } from '@/core/preview'
 import { openTablePage } from '@/core/table-open'
 import { officeLabels } from '@/core/office-view'
-import { headingIndex, previewTarget, sameSite } from '@/core/links'
+import { headingIndex, isSameFile, previewTarget, sameSite } from '@/core/links'
 import { isPageName } from '@/core/file-types'
 import { exportHtml, printPage } from '@/core/export'
 import { applyCustomCss, applyReading } from '@/core/reading'
@@ -323,6 +323,24 @@ function main(data: Data) {
           openTablePage(csv, e.ctrlKey || e.metaKey)
           return
         }
+      }
+      // any other local file (a picture, a PDF, a folder...): a tab of its
+      // own, so the document stays, as in the pane
+      if (
+        link &&
+        configData.linkPreview &&
+        e.button === 0 &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        !e.altKey &&
+        !href.startsWith('#') &&
+        (link as HTMLAnchorElement).protocol === 'file:' &&
+        !isSameFile(href, location.href)
+      ) {
+        e.preventDefault()
+        window.open((link as HTMLAnchorElement).href, '_blank', 'noopener')
+        return
       }
       // in the folder page a web site would take the frame, and most sites
       // refuse to be shown in one: it gets a tab of its own

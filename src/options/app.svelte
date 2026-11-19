@@ -8,7 +8,14 @@
     type MdConfig,
     type MdCoreConfig,
   } from '@/core/data'
-  import { parseExtensions, sanitizeExts } from '@/core/file-types'
+  import {
+    DIAGRAM_EXTS,
+    MD_EXTS,
+    TABLE_EXTS,
+    TEXT_EXTS,
+    parseExtensions,
+    sanitizeExts,
+  } from '@/core/file-types'
   import { getReading, READING_LIMITS, type Reading } from '@/core/data'
   import {
     ALL_SITES,
@@ -56,6 +63,14 @@
   let codeExts: string[] = []
   let codeExtsText = ''
   let codeExtsInvalid: string[] = []
+  /** the types AnyRead MD opens by itself, so nobody adds them again */
+  const builtInTypes = (l: typeof localize) =>
+    [
+      `Markdown (${MD_EXTS.join(', ')})`,
+      TEXT_EXTS.join(', '),
+      `${l('opt_file_types_tables')} (${TABLE_EXTS.join(', ')})`,
+      `Mermaid (${DIAGRAM_EXTS.join(', ')})`,
+    ].join(' · ')
 
   /* welcome / quick start (opened automatically after install) */
   let showWelcome = location.hash === '#welcome'
@@ -402,12 +417,13 @@
   <section class="file-types">
     <div class="name">{localize('opt_file_types')}</div>
     <div class="desc">{localize('opt_file_types_desc')}</div>
+    <div class="desc">{localize('opt_file_types_builtin')}{builtInTypes(localize)}</div>
     <form class="ext-form" on:submit|preventDefault={saveCodeExts}>
       <input
         type="text"
         spellcheck="false"
         autocomplete="off"
-        placeholder="c, h, cpp, py, txt"
+        placeholder="c, h, cpp, py"
         aria-label={localize('opt_file_types')}
         bind:value={codeExtsText}
         class:invalid={codeExtsInvalid.length}

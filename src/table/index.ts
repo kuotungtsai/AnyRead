@@ -40,12 +40,25 @@ async function main() {
   nameEl.textContent = name || 'AnyRead MD'
   nameEl.title = decodeSafe(src)
   document.title = name || 'AnyRead MD'
-  // on the right of the folder page: its tree marks this file
+  // on the right of the folder page: its tree marks this file, and Close
+  // (or Esc, here or in the tree) goes back to the folder's file list
   if (inFolderFrame()) {
     window.parent.postMessage(
       { type: 'anyread:shown', url: src.split('#')[0] },
       '*',
     )
+    const close = $('close') as HTMLButtonElement
+    const toList = () =>
+      window.parent.postMessage({ type: 'anyread:close' }, '*')
+    close.textContent = `${t('editor_close')} (Esc)`
+    close.hidden = false
+    close.addEventListener('click', toList)
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') toList()
+    })
+    window.addEventListener('message', e => {
+      if (e.source === window.parent && e.data?.type === 'anyread:esc') toList()
+    })
   }
 
   let url: URL

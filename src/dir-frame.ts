@@ -452,30 +452,76 @@ async function topMode() {
     scroll.append(view)
     main.append(frame, scroll)
 
+    // What the right side shows ('' = the file list) is kept in the page's
+    // history entry, so the browser's Back and Forward move between the list
+    // and the files opened here. Our own moves replace the frame's document
+    // (no entry of its own); links followed inside the frame add theirs.
     let shown = ''
-    function showFile(url: string) {
+    let frameUsed = false
+    const remember = (push: boolean) => {
+      const state = { ...history.state, anyreadShown: shown }
+      if (push) history.pushState(state, '')
+      else history.replaceState(state, '')
+    }
+    // the file last loaded into the frame, until the frame says it shows it
+    let wanted = ''
+    let retried = false
+    const loadFrame = (url: string) => {
+      wanted = url
+      retried = false
+      const src = frameSrc(url)
+      if (!frameUsed) {
+        frameUsed = true
+        frame.src = src // the first load replaces the empty frame
+      } else frame.contentWindow.location.replace(src)
+    }
+    const sameFile = (a: string, b: string) =>
+      decode(a.split('#')[0]) === decode(b.split('#')[0])
+    function showFile(url: string, push = true) {
+      if (url !== shown || frame.hidden) loadFrame(url)
       shown = url
-      frame.src = frameSrc(url)
       frame.hidden = false
       scroll.hidden = true
       markShown()
+      remember(push)
     }
-    function showList() {
+    function showList(push = true) {
+      if (push && !shown && frame.hidden) return filter.focus()
       shown = ''
-      frame.removeAttribute('src')
+      // drop the hidden file (a large table stays in memory otherwise)
+      wanted = ''
+      if (frameUsed) frame.contentWindow.location.replace('about:blank')
       frame.hidden = true
       scroll.hidden = false
       markShown()
+      remember(push)
       filter.focus()
     }
-    // a file opened inside the frame: the tree marks it
+    window.addEventListener('popstate', e => {
+      const url = e.state?.anyreadShown
+      if (typeof url !== 'string') return
+      if (url) showFile(url, false)
+      else showList(false)
+    })
     window.addEventListener('message', e => {
-      if (e.source !== frame.contentWindow || e.data?.type !== 'anyread:shown')
-        return
+      if (e.source !== frame.contentWindow) return
+      // the table page's Close button (or Esc): back to the file list
+      if (e.data?.type === 'anyread:close') return showList()
+      // a file opened inside the frame: the tree marks it
+      if (e.data?.type !== 'anyread:shown') return
       const url = String(e.data.url || '')
       if (!url.startsWith('file:')) return
+      if (wanted && !sameFile(url, wanted) && !retried) {
+        // a page already replaced finished loading late (Back pressed while
+        // it loaded) and took the frame: load the file this entry is for
+        retried = true
+        frame.contentWindow.location.replace(frameSrc(wanted))
+        return
+      }
+      wanted = ''
       shown = url
       markShown()
+      remember(false)
     })
 
     /** open a file on the right; false when it is not one the right side shows */
@@ -619,8 +665,8 @@ async function topMode() {
     const readme = entries.find(
       e => !e.isDir && /^readme\.(md|markdown|mdx|mkd|txt)$/i.test(e.name),
     )
-    if (readme) showFile(readme.url)
-    else showList()
+    if (readme) showFile(readme.url, false)
+    else showList(false)
   })
 }
 

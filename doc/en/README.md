@@ -105,7 +105,7 @@ AnyRead MD has its own version numbers, starting at 1.0.0, following [Semantic V
 - The version shown in the extension is just `version` (such as `1.0.1`). The upstream version it is based on is recorded in `upstreamVersion` in `package.json`, for the record only; update it when merging a new upstream version. Credit to the original is in `LICENSE`, `THIRD_PARTY_NOTICES.txt`, the manifest's `author` and the README.
 - For reference: 1.0.0 = md-reader 2.12.12 + the folder tree, edit mode, plugin settings, the folder view, and upgraded dependencies (mermaid 11, markdown-it 15, KaTeX 0.18, Svelte 5). The 2.13.0 before it is the same code with a different version number.
 
-Before a new release, raise `version` in `package.json` so versions can be told apart. `pack:share` does not run `build:manifest`, so run `pnpm run build` (or `pnpm run build:manifest`) once first, or the zip file name keeps the old version.
+Before a new release, raise `version` in `package.json` so versions can be told apart. `pnpm run build` updates the manifest's version, builds, and packs `dist/anyread-md-<version>.zip` (the same zip as `pack:share`). `pack:share` alone does not update the manifest, so run `pnpm run build` (or `pnpm run build:manifest`) once first, or the zip file name keeps the old version.
 
 ### Releasing
 

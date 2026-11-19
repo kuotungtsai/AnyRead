@@ -85,6 +85,7 @@ Open source, based on md-reader 2.x (MIT License). Source code: https://github.c
 - Store icon（128×128）：`store/store-icon-128.png`（96×96 圖案加 16px 透明邊，符合商店規範）
 - Screenshots（1280×800，依序上傳，商店最多 5 張）：`store/screenshots/1-split-view.png`、`2-tables.png`、`3-folder-view.png`、`4-edit-mode.png`、`5-dark-math-diagrams.png`
 - Small promo tile（440×280）：`store/promo-440x280.png`
+- Marquee promo tile（1400×560，24 位元 PNG，無透明層）：`store/promo-marquee-1400x560.png`
 
 **Additional fields**
 

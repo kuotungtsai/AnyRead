@@ -5,6 +5,8 @@ import {
   MD_EXTS,
   isDiagramName,
   isMarkdownName,
+  isOfficeName,
+  isPageName,
   matchPatterns,
   patternsFor,
   sanitizeExts,
@@ -22,6 +24,7 @@ import {
   tablePageUrl,
 } from '@/core/table'
 import { readXlsx } from '@/core/xlsx'
+import { readOffice, type OfficeDoc } from '@/core/office'
 
 /** rows of each Excel sheet sent to the pane (it shows 1000) */
 const PANE_SHEET_ROWS = 1001
@@ -91,21 +94,29 @@ async function readFile(
   tooLarge?: boolean
   text?: string
   sheets?: { name: string; rows: string[][]; total: number }[]
+  office?: OfficeDoc
 }> {
   try {
     const target = new URL(url)
     const origin = new URL(from)
     const name = target.pathname
     const table = isTableName(name)
+    const office = isOfficeName(name)
     const plain =
       !table &&
+      !office &&
       !isMarkdownName(name) &&
       textMatcher((await storage.get('codeExts')).codeExts)(name)
     const doc = isMarkdownName(name) || isDiagramName(name)
-    if (!sameSite(target, origin) || !(table || plain || doc))
+    if (!sameSite(target, origin) || !(table || office || plain || doc))
       return { ok: false }
     const res = await fetch(target.href.split('#')[0])
     if (!res.ok && res.status !== 0) return { ok: false }
+    if (office) {
+      const bytes = await readLimited(res, PANE_MAX_BYTES)
+      if (!bytes) return { ok: false, tooLarge: true }
+      return { ok: true, office: await readOffice(bytes, name) }
+    }
     if (table || plain) {
       // never hold a huge table or text file whole in the worker
       const bytes = await readLimited(res, PANE_MAX_BYTES)
@@ -146,7 +157,7 @@ async function openTable(
   try {
     const target = new URL(url)
     if (!/^(file|https?):$/.test(target.protocol)) return false
-    if (!isTableName(target.pathname)) return false
+    if (!isPageName(target.pathname)) return false
     const page = tablePageUrl(chrome.runtime.getURL(''), target.href)
     const tab = sender.tab
     if (!newTab && tab?.id !== undefined) {

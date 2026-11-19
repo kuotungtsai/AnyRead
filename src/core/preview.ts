@@ -8,7 +8,7 @@
  */
 import Ele from './ele'
 import className from '@/config/class-name'
-import { fileName } from './file-types'
+import { fileName, isOfficeName, isPageName } from './file-types'
 import { headingIndex, isSameFile, previewTarget } from './links'
 import { safeCall } from './runtime'
 import { isTableName, isWorkbookName } from './table'
@@ -19,6 +19,8 @@ import {
   type TableLabels,
 } from './table-view'
 import { openTablePage } from './table-open'
+import type { OfficeDoc } from './office'
+import { renderOffice, type OfficeLabels } from './office-view'
 
 export interface PreviewLabels {
   open: string
@@ -33,6 +35,7 @@ export interface PreviewLabels {
   /** a file too large to show in the pane */
   tooLarge: string
   table: TableLabels
+  office: OfficeLabels
 }
 
 export interface PreviewOptions {
@@ -48,10 +51,14 @@ export interface PreviewOptions {
 
 const stripHash = (url: string) => url.split('#')[0]
 
-/** a file's text, or an Excel file's sheets; null when it cannot be read */
-function readFile(
-  url: string,
-): Promise<{ text?: string; sheets?: SheetData[]; tooLarge?: boolean } | null> {
+/** a file's text, an Excel file's sheets, a Word / PowerPoint file's
+ *  content; null when it cannot be read */
+function readFile(url: string): Promise<{
+  text?: string
+  sheets?: SheetData[]
+  office?: OfficeDoc
+  tooLarge?: boolean
+} | null> {
   return new Promise(resolve => {
     const sent = safeCall(() =>
       chrome.runtime.sendMessage({ action: 'readFile', data: { url } }, res => {
@@ -85,7 +92,7 @@ function openInNewTab(url: string) {
 
 /** open a file outside the pane: CSV on the table page, the rest directly */
 function openFile(url: string, newTab: boolean) {
-  if (isTableName(url)) openTablePage(url, newTab)
+  if (isPageName(url)) openTablePage(url, newTab)
   else if (newTab) openInNewTab(url)
   else location.href = url
 }
@@ -242,6 +249,12 @@ export function createLinkPreview(opts: PreviewOptions) {
     if (current !== url) return // another link was clicked meanwhile
     if (source === null || source.tooLarge) {
       content.textContent = source ? labels.tooLarge : labels.error
+      return
+    }
+    if (isOfficeName(file)) {
+      if (source.office) renderOffice(content.ele, source.office, labels.office)
+      else content.textContent = labels.error
+      panel.ele.scrollTop = scroll ?? 0
       return
     }
     if (isTableName(file)) {

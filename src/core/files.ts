@@ -1,7 +1,7 @@
 import Ele from './ele'
 import className from '@/config/class-name'
 import type { DirEntry } from '@/dir-frame'
-import { isTableName } from './file-types'
+import { isOfficeName, isPageName } from './file-types'
 import { openTablePage } from './table-open'
 
 export const MD_EXT_RE = /\.(md|mdx|mkd|markdown)$/i
@@ -167,9 +167,9 @@ export function createFileTree(
       if (stripUrl(entry.url) === currentFile) {
         li.classList.add(className.FILES_ACTIVE)
       }
-      // a CSV file: Chrome would only download it
-      if (isTableName(entry.url)) {
-        icon.textContent = '▦'
+      // a table, Word or PowerPoint file: Chrome would only download it
+      if (isPageName(entry.url)) {
+        icon.textContent = isOfficeName(entry.url) ? '▤' : '▦'
         link.on('click', (e: MouseEvent) => {
           if (e.shiftKey || e.altKey) return
           e.preventDefault()

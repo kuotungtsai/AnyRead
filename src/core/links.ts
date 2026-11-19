@@ -1,6 +1,5 @@
 /** Pure helpers for links between Markdown files (no DOM, easy to test). */
-import { isDiagramName, isMarkdownName } from './file-types'
-import { isTableName } from './table'
+import { isDiagramName, isMarkdownName, isPageName } from './file-types'
 
 const stripHash = (url: string) => url.split('#')[0]
 
@@ -95,7 +94,7 @@ export function previewTarget(
   if (
     !isMarkdownName(name) &&
     !isDiagramName(name) &&
-    !isTableName(name) &&
+    !isPageName(name) &&
     !isText(name)
   )
     return null

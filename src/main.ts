@@ -42,8 +42,9 @@ import exportIcon from '@/images/icon_export.svg'
 import closeIcon from '@/images/icon_close.svg'
 import { createLinkPreview } from '@/core/preview'
 import { openTablePage } from '@/core/table-open'
+import { officeLabels } from '@/core/office-view'
 import { headingIndex, previewTarget, sameSite } from '@/core/links'
-import { isTableName } from '@/core/table'
+import { isPageName } from '@/core/file-types'
 import { exportHtml, printPage } from '@/core/export'
 import { applyCustomCss, applyReading } from '@/core/reading'
 import { rememberPage } from '@/core/recent'
@@ -246,6 +247,7 @@ function main(data: Data) {
         truncated: localize('table_truncated'),
         empty: localize('table_empty'),
       },
+      office: officeLabels(localize),
     },
     isText: name => paneText(name),
     render(target, source, file) {
@@ -943,7 +945,7 @@ function isTextDocument(): boolean {
 function tableLink(link: HTMLAnchorElement): string | null {
   try {
     const url = new URL(link.href)
-    return isTableName(url.pathname) && sameSite(url, new URL(location.href))
+    return isPageName(url.pathname) && sameSite(url, new URL(location.href))
       ? url.href
       : null
   } catch {

@@ -13,7 +13,13 @@
 import './style/dir-frame.less'
 import storage from '@/core/storage'
 import i18n from '@/config/i18n'
-import { isMarkdownName, isTableName, viewableMatcher } from '@/core/file-types'
+import {
+  isMarkdownName,
+  isOfficeName,
+  isPageName,
+  isTableName,
+  viewableMatcher,
+} from '@/core/file-types'
 import { openTablePage } from '@/core/table-open'
 import { tablePageUrl } from '@/core/table'
 import { FOLDER_FRAME, listDir } from '@/core/files'
@@ -192,7 +198,7 @@ async function topMode() {
     isViewable(name) || /\.(png|jpe?g|gif|webp|svg|bmp|avif|pdf)$/i.test(name)
   /** what the frame loads for a file: CSV / Excel go to the table page */
   const frameSrc = (url: string) =>
-    isTableName(url) ? tablePageUrl(chrome.runtime.getURL(''), url) : url
+    isPageName(url) ? tablePageUrl(chrome.runtime.getURL(''), url) : url
 
   whenListed(() => {
     const here = location.href.split('#')[0]
@@ -416,11 +422,12 @@ async function topMode() {
         })
         const a = el('a', { href: e.url, title: e.name })
         const table = !e.isDir && isTableName(e.name)
+        const office = !e.isDir && isOfficeName(e.name)
         a.append(
           el(
             'span',
             { class: 'mdr-icon' },
-            table ? '📊' : ['📁', '📝', '📃', '📄'][k],
+            table ? '📊' : office ? '📑' : ['📁', '📝', '📃', '📄'][k],
           ),
           el('span', { class: 'mdr-name' }, e.name),
           el('span', { class: 'mdr-meta size' }, e.isDir ? '' : e.size || ''),
@@ -523,7 +530,7 @@ async function topMode() {
         const href = (links[selected] as HTMLAnchorElement).href
         if (href.endsWith('/')) go({ dir: href, left: cur, shown: '' })
         else if (openEntry(href, e)) return
-        else if (isTableName(href)) openTablePage(href, e.ctrlKey || e.metaKey)
+        else if (isPageName(href)) openTablePage(href, e.ctrlKey || e.metaKey)
         else location.href = href
       } else if (
         e.key.length === 1 &&
@@ -640,7 +647,7 @@ async function topMode() {
     function openEntry(url: string, ev?: MouseEvent | KeyboardEvent) {
       if (!showable(url)) return false
       if (newTab(ev)) {
-        if (isTableName(url)) openTablePage(url, true)
+        if (isPageName(url)) openTablePage(url, true)
         else window.open(url, '_blank', 'noopener')
         return true
       }
@@ -731,7 +738,13 @@ async function topMode() {
       const ul = el('ul')
       for (const e of treeEntries(items)) {
         const li = el('li')
-        const icon = e.isDir ? '▸' : isTableName(e.name) ? '▦' : '•'
+        const icon = e.isDir
+          ? '▸'
+          : isTableName(e.name)
+          ? '▦'
+          : isOfficeName(e.name)
+          ? '▤'
+          : '•'
         const a = treeLink(
           icon,
           e.name,

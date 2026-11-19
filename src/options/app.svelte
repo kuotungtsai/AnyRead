@@ -11,6 +11,7 @@
   import {
     DIAGRAM_EXTS,
     MD_EXTS,
+    OFFICE_EXTS,
     TABLE_EXTS,
     TEXT_EXTS,
     parseExtensions,
@@ -69,6 +70,7 @@
       `Markdown (${MD_EXTS.join(', ')})`,
       TEXT_EXTS.join(', '),
       `${l('opt_file_types_tables')} (${TABLE_EXTS.join(', ')})`,
+      `Word, PowerPoint (${OFFICE_EXTS.join(', ')})`,
       `Mermaid (${DIAGRAM_EXTS.join(', ')})`,
     ].join(' · ')
 

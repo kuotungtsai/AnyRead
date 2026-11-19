@@ -24,8 +24,9 @@ files. It is free, has no accounts and does not collect any data.
   (address and title). This list is stored only on your device, is never
   sent anywhere, and can be cleared or turned off in the settings.
 - **Linked files and export.** When you click a link to another file the
-  extension can show (Markdown, a table such as CSV or Excel, a text or code
-  file, a Mermaid diagram), that file is read and shown next to the current
+  extension can show (Markdown, a table such as CSV or Excel, a Word or
+  PowerPoint file, a text or code file, a Mermaid diagram), that file is read
+  and shown next to the current
   one or on the extension's own table page. Only files on your computer, or
   on the same web site as the page you are reading, are read this way.
   Tables and workbooks are read inside your browser; the Download button
@@ -86,9 +87,9 @@ AnyRead MD 是用來顯示、瀏覽和編輯 Markdown 檔案的瀏覽器擴充�
 - **最近開過的檔案**：工具列小視窗可以列出最近開過的檔案（網址和標題）。清單只存在
   你的裝置上，不會傳到任何地方，可以在設定頁清除或關閉。
 - **連結的檔案與匯出**：點連到擴充能顯示的檔案（Markdown、CSV 或 Excel 表格、
-  文字或程式碼檔、Mermaid 圖）的連結時，會讀取那個檔案，顯示在旁邊或擴充自己的
-  表格頁。只會讀取你電腦上的檔案，或跟目前頁面同一個網站上的檔案。表格和活頁簿都
-  在瀏覽器裡解析；「下載」按鈕存下的就是同一個檔案。匯出是在你的裝置上產生 PDF 或
+  Word 或 PowerPoint 檔、文字或程式碼檔、Mermaid 圖）的連結時，會讀取那個檔案，顯示在旁邊或擴充自己的
+  表格頁。只會讀取你電腦上的檔案，或跟目前頁面同一個網站上的檔案。表格、活頁簿和
+  Word、PowerPoint 檔都在瀏覽器裡解析；「下載」按鈕存下的就是同一個檔案。匯出是在你的裝置上產生 PDF 或
   HTML 檔。這些都不會把資料傳到伺服器。
 - **設定檔**：你可以把設定存成檔案放在自己的裝置上，也可以從這種檔案還原。檔案
   裡只有設定，不含最近開過的檔案，也不會傳到任何地方。

@@ -159,3 +159,23 @@ main {
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* ---------- Word and PowerPoint files ---------- */
+@import '../style/office.less';
+:root {
+  --office-line: var(--line);
+  --office-muted: var(--muted);
+}
+body.office main {
+  display: block;
+  overflow: auto;
+  padding: 20px 24px 40px;
+}
+body.office .anyread-office {
+  max-width: 860px;
+  margin: 0 auto;
+  font-size: 15px;
+  a {
+    color: var(--accent);
+  }
+}

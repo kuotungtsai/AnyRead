@@ -1,4 +1,5 @@
 @import url('./variable.less');
+@import url('./office.less');
 @side-width: 260px;
 
 // Chrome paints a Markdown file as plain text before the reader has loaded.
@@ -1008,4 +1009,10 @@ body.md-reader .md-reader__button-wrap--closable {
   .md-reader__export-menu {
     right: 96px;
   }
+}
+
+/* ---------- Word and PowerPoint files in the pane (office.less) ---------- */
+body.md-reader {
+  --office-line: var(--color-border);
+  --office-muted: var(--color-text-gray);
 }

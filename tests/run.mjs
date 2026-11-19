@@ -24,7 +24,10 @@ const MODULES = [
   'recent',
   'reading-config',
   'table',
+  'zip',
+  'xml',
   'xlsx',
+  'office',
   'settings-file',
 ]
 

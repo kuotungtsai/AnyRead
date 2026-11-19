@@ -17,6 +17,10 @@ Everything is handled on your computer: **no account, no tracking, and no connec
   - CSV: comma, semicolon and tab delimiters are detected. Files that are not UTF-8 (such as Big5 saved by Excel) are read in the usual encoding for the interface language.
   - Excel: one tab per sheet. Cell values are shown, with dates, times and percentages formatted as in Excel; other formatting (currency signs, colours, merged cells, charts) is not. Formulas show the result Excel saved with the file. The older `.xls` is not supported. Files are read inside the browser, with no outside service or library.
   - The table page shows up to 10,000 rows and the right side 1,000. A file that is too large is not read in full; a short message says so instead (20 MB on the right side, 100 MB on the table page; an `.xlsx` sheet that unpacks to more than 64 MB). Opening a `.csv` or `.xlsx` from the address bar is still a download; an extension cannot change that.
+- **Word and PowerPoint**: Chrome downloads `.docx` and `.pptx` files too. Links to them show their content on the right; "Open in a new tab", the folder view and the Files tab open them on the table page (with Download). The content only, not the layout:
+  - Word: headings, paragraphs, bold / italic / underline, bulleted and numbered lists, tables, links, pictures and footnotes. Headers and footers, text boxes, shapes, charts, comments and tracked changes are not shown.
+  - PowerPoint: one block per slide, in order: the title, the text (with its levels), tables, pictures and the speaker notes; hidden slides are marked. Slide layout, backgrounds, themes, shapes, charts and animations are not reproduced.
+  - Files are read inside the browser, with no added library. The older `.doc` and `.ppt` are not supported.
 - **Mermaid files**: `.mmd` and `.mermaid` files are drawn as diagrams, also on the right side, even with the Mermaid plugin turned off in Settings. ` ```mermaid ` blocks in Markdown documents are still handled by the Mermaid plugin.
 - **Export**: the export button at the top right can "Print / Save as PDF" or save a single HTML file (styles, pictures and math fonts included in the file).
 - **Reading settings**: font size, content width and line height in Settings, and your own CSS.
@@ -124,7 +128,10 @@ When a tag starting with `v` (such as `v1.1.2`) is pushed, GitHub Actions builds
 | `src/core/table.ts`         | CSV / TSV parsing, encoding detection                          |
 | `src/core/settings-file.ts` | Settings file export and import checks                         |
 | `src/core/xlsx.ts`          | Reads Excel `.xlsx` (no library)                               |
-| `src/table/`                | The CSV / Excel table page (with Download)                     |
+| `src/core/zip.ts`           | Reads zip files (Office files) with the browser's own unzip    |
+| `src/core/office.ts`        | Reads the content of Word `.docx` and PowerPoint `.pptx`       |
+| `src/core/office-view.ts`   | Shows Word / PowerPoint content                                |
+| `src/table/`                | The table page: CSV, Excel, Word, PowerPoint (with Download)   |
 | `src/core/export.ts`        | Export to PDF / HTML                                           |
 | `src/core/web-access.ts`    | Web site access (turned on by you)                             |
 | `tests/`                    | Unit tests (`pnpm test`)                                       |
@@ -139,7 +146,7 @@ When a tag starting with `v` (such as `v1.1.2`) is pushed, GitHub Actions builds
 
 - No data is collected or uploaded; no analytics, tracking or accounts.
 - After installing, the extension has access to no web site; only sites you turn on yourself are handled.
-- The only network requests are: reading again the Markdown address you are viewing (for auto refresh), reading files on the same site that links you click point to (Markdown, CSV, Excel, text, Mermaid; for the right side and the table page), and remote pictures and links in the document (loaded by the browser itself).
+- The only network requests are: reading again the Markdown address you are viewing (for auto refresh), reading files on the same site that links you click point to (Markdown, CSV, Excel, Word, PowerPoint, text, Mermaid; for the right side and the table page), and remote pictures and links in the document (loaded by the browser itself).
 - The recent files list is kept only on your computer, and can be cleared or turned off.
 - A settings file is kept only where you save it, and holds only settings, not your recent files.
 - Local files are rendered only inside the browser. The folder listing is read from Chrome's own `file://` listing page, and the result goes back only to the same tab.

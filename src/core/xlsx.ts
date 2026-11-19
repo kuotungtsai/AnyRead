@@ -1,8 +1,8 @@
 /**
  * A small reader for Excel workbooks (.xlsx): the values of every sheet, as
  * text, the way Excel shows them closely enough for reading. No formatting,
- * charts or pictures. Uses the browser's own unzip (DecompressionStream), so
- * it needs no library and also runs in the background worker and in Node.
+ * charts or pictures. Needs no library (see zip.ts) and also runs in the
+ * background worker and in Node.
  *
  * An .xlsx file is a zip of XML files:
  *   xl/workbook.xml            sheet names and order
@@ -11,125 +11,17 @@
  *   xl/styles.xml              number formats (dates, percentages)
  *   xl/worksheets/sheetN.xml   the cells
  */
-import { TOO_LARGE } from './table'
+import { folderOf, joinPath, openZip } from './zip'
+import { unescapeXml } from './xml'
+
+export { unescapeXml }
 
 export interface Sheet {
   name: string
   rows: string[][]
 }
 
-/* ---------------- zip ---------------- */
-
-interface ZipEntry {
-  method: number
-  size: number
-  offset: number
-}
-
-const u16 = (b: Uint8Array, i: number) => b[i] | (b[i + 1] << 8)
-const u32 = (b: Uint8Array, i: number) =>
-  (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0
-
-function zipEntries(b: Uint8Array): Map<string, ZipEntry> {
-  // end of central directory: the last 22 bytes, plus a comment of up to 64 KB
-  let end = -1
-  for (let i = b.length - 22; i >= Math.max(0, b.length - 22 - 65535); i--) {
-    if (u32(b, i) === 0x06054b50) {
-      end = i
-      break
-    }
-  }
-  if (end < 0) throw new Error('not a zip file')
-  const count = u16(b, end + 10)
-  let p = u32(b, end + 16)
-  const names = new TextDecoder()
-  const entries = new Map<string, ZipEntry>()
-  for (let n = 0; n < count; n++) {
-    if (u32(b, p) !== 0x02014b50) throw new Error('broken zip directory')
-    const method = u16(b, p + 10)
-    const size = u32(b, p + 20)
-    const nameLen = u16(b, p + 28)
-    const extraLen = u16(b, p + 30)
-    const commentLen = u16(b, p + 32)
-    const local = u32(b, p + 42)
-    const name = names.decode(b.subarray(p + 46, p + 46 + nameLen))
-    // the data starts after the local header, whose extra field may differ
-    const offset = local + 30 + u16(b, local + 26) + u16(b, local + 28)
-    entries.set(name.replace(/\\/g, '/'), { method, size, offset })
-    p += 46 + nameLen + extraLen + commentLen
-  }
-  return entries
-}
-
-/** most bytes one part of a workbook may unpack to (a sheet's XML) */
-const MAX_XML = 64 * 1024 * 1024
-
-/** unpack a zip entry, giving up past MAX_XML (a "zip bomb" stops here) */
-async function inflate(data: Uint8Array): Promise<Uint8Array> {
-  const stream = new Blob([data])
-    .stream()
-    .pipeThrough(new DecompressionStream('deflate-raw'))
-  const reader = stream.getReader()
-  const parts: Uint8Array[] = []
-  let total = 0
-  for (;;) {
-    const { done, value } = await reader.read()
-    if (done) break
-    total += value.length
-    if (total > MAX_XML) {
-      reader.cancel().catch(() => {})
-      throw new Error(TOO_LARGE)
-    }
-    parts.push(value)
-  }
-  const out = new Uint8Array(total)
-  let at = 0
-  for (const part of parts) {
-    out.set(part, at)
-    at += part.length
-  }
-  return out
-}
-
-async function readEntry(
-  b: Uint8Array,
-  entries: Map<string, ZipEntry>,
-  name: string,
-): Promise<string | null> {
-  const e = entries.get(name)
-  if (!e) return null
-  const raw = b.subarray(e.offset, e.offset + e.size)
-  let data: Uint8Array
-  if (e.method === 0) data = raw
-  else if (e.method === 8) data = await inflate(raw)
-  else throw new Error('unsupported zip compression')
-  return new TextDecoder().decode(data)
-}
-
 /* ---------------- XML (only what Excel writes) ---------------- */
-
-const ENTITIES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'",
-}
-
-export function unescapeXml(s: string): string {
-  return s
-    .replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (m, e: string) => {
-      if (e[0] === '#') {
-        const code =
-          e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : +e.slice(1)
-        return Number.isFinite(code) ? String.fromCodePoint(code) : m
-      }
-      return ENTITIES[e] ?? m
-    })
-    .replace(/_x([0-9a-f]{4})_/gi, (_, h) =>
-      String.fromCharCode(parseInt(h, 16)),
-    )
-}
 
 function attrs(tag: string): Record<string, string> {
   const out: Record<string, string> = {}
@@ -309,29 +201,12 @@ function parseSheet(
   return rows
 }
 
-/** the folder of a zip path: "xl/workbook.xml" → "xl/" */
-const folderOf = (path: string) => path.slice(0, path.lastIndexOf('/') + 1)
-
-/** resolve a relationship target against its folder ("../a", "/xl/a") */
-function joinPath(folder: string, target: string): string {
-  const parts = (
-    target.startsWith('/') ? target.slice(1) : folder + target
-  ).split('/')
-  const out: string[] = []
-  for (const p of parts) {
-    if (p === '..') out.pop()
-    else if (p !== '.') out.push(p)
-  }
-  return out.join('/')
-}
-
 /** every sheet of an .xlsx file, values as text */
 export async function readXlsx(
   bytes: ArrayBuffer | Uint8Array,
 ): Promise<Sheet[]> {
-  const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
-  const entries = zipEntries(b)
-  const read = (name: string) => readEntry(b, entries, name)
+  const zip = openZip(bytes)
+  const read = (name: string) => zip.text(name)
 
   // the workbook is usually xl/workbook.xml; the package root says for sure
   const rootRels = (await read('_rels/.rels')) || ''

@@ -11,6 +11,8 @@ export const TABLE_EXTS = ['csv', 'tsv', 'xlsx', 'xlsm']
 export const WORKBOOK_EXTS = ['xlsx', 'xlsm']
 /** Mermaid diagram files, drawn as a diagram */
 export const DIAGRAM_EXTS = ['mmd', 'mermaid']
+/** Word and PowerPoint files, shown as their text (Chrome would download them) */
+export const OFFICE_EXTS = ['docx', 'pptx']
 /** plain text, shown like Markdown (line breaks kept) */
 export const TEXT_EXTS = ['txt']
 /** types AnyRead MD shows by itself; never registered again as code types */
@@ -19,6 +21,7 @@ const BUILT_IN_EXTS = () => [
   ...DIAGRAM_EXTS,
   ...TEXT_EXTS,
   ...TABLE_EXTS,
+  ...OFFICE_EXTS,
 ]
 
 /** a plain extension: letters/digits, optionally with _ + - (e.g. c, h, cpp, c++, tsx) */
@@ -119,6 +122,14 @@ export const isTableName = (name: string) =>
 export const isWorkbookName = (name: string) =>
   WORKBOOK_EXTS.includes(urlExtension(name))
 
+export const isOfficeName = (name: string) =>
+  OFFICE_EXTS.includes(urlExtension(name))
+
+/** files shown on the extension's own page (the table page): tables, Word,
+ *  PowerPoint. Chrome would only download them. */
+export const isPageName = (name: string) =>
+  isTableName(name) || isOfficeName(name)
+
 export const isDiagramName = (name: string) =>
   DIAGRAM_EXTS.includes(urlExtension(name))
 
@@ -138,6 +149,7 @@ export function viewableMatcher(codeExts: string[] = []) {
     ...DIAGRAM_EXTS,
     ...TEXT_EXTS,
     ...TABLE_EXTS,
+    ...OFFICE_EXTS,
     ...sanitizeExts(codeExts),
   ]
   return (name: string) => all.includes(urlExtension(name))

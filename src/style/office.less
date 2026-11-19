@@ -1,0 +1,87 @@
+// Word and PowerPoint files (core/office-view.ts), in the pane and on the
+// table page. Colors come from --office-line / --office-muted, set by each.
+.anyread-office {
+  line-height: 1.65;
+  overflow-wrap: break-word;
+  p,
+  li {
+    white-space: pre-wrap; // tabs and runs of spaces as Word keeps them
+  }
+  p {
+    margin: 0 0 0.6em;
+    min-height: 1em; // an empty Word paragraph keeps its line
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  .anyread-office-pic,
+  .anyread-office-empty {
+    color: var(--office-muted);
+  }
+  .anyread-office-ref {
+    font-size: 0.75em;
+  }
+  .anyread-office-table {
+    overflow-x: auto;
+    margin: 0 0 1em;
+  }
+  table {
+    border-collapse: collapse;
+  }
+  td {
+    padding: 4px 8px;
+    border: 1px solid var(--office-line);
+    vertical-align: top;
+    p {
+      margin: 0;
+    }
+  }
+  .anyread-office-notes {
+    margin-top: 2em;
+    padding-top: 0.5em;
+    border-top: 1px solid var(--office-line);
+    font-size: 0.9em;
+    h2 {
+      margin: 0 0 0.5em;
+      font-size: 1em;
+      border: 0;
+    }
+  }
+}
+.anyread-office--pptx {
+  .anyread-slide {
+    margin: 0 0 18px;
+    padding: 12px 20px 10px;
+    border: 1px solid var(--office-line);
+    border-radius: 10px;
+  }
+  .anyread-slide--hidden {
+    opacity: 0.6;
+  }
+  .anyread-slide-no,
+  .anyread-slide-notes-label {
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--office-muted);
+  }
+  .anyread-slide-tag {
+    margin-left: 8px;
+    padding: 0 6px;
+    border: 1px solid var(--office-line);
+    border-radius: 4px;
+  }
+  .anyread-slide-title {
+    margin: 0 0 0.5em;
+    padding: 0;
+    font-size: 1.35em;
+    border: 0;
+  }
+  .anyread-slide-notes {
+    margin: 10px 0 4px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(127, 127, 127, 0.1);
+    font-size: 0.9em;
+  }
+}

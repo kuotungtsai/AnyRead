@@ -7,7 +7,7 @@ import { urlExtension } from './file-types'
 import { guessDelimiter, parseDelimited } from './table'
 
 export interface TableLabels {
-  /** "{rows} rows · {cols} columns" */
+  /** "Rows: {rows} · Columns: {cols}" */
   size: string
   /** "Showing the first {rows} rows" */
   truncated: string

@@ -8,12 +8,12 @@ import className from '@/config/class-name'
 import type { Theme } from '@/config/page-themes'
 import { getDefaultData, getDefaultMdConfig, type Data } from '@/core/data'
 import { mdRender, type MdOptions } from '@/core/markdown'
-import { createFileTree, isFileProtocol } from '@/core/files'
+import { createFileTree, inFolderFrame, isFileProtocol } from '@/core/files'
 import {
   codeLanguage,
   fileName,
   isDiagramName,
-  isMarkdownName,
+  isPlainTextName,
   sanitizeExts,
   textMatcher,
   toCodeFence,
@@ -49,6 +49,9 @@ import { rememberPage } from '@/core/recent'
 import { writeText } from '@/shared'
 import '@/style/index.less'
 
+/** Markdown options for .txt files: line breaks kept, text shown as written */
+const TXT_CORE = { breaks: true, html: false, typographer: false }
+
 function main(data: Data) {
   const configData = getDefaultData(data)
   const actions = {
@@ -77,7 +80,8 @@ function main(data: Data) {
       mdContent.classList.toggle('centered', value)
     },
     toggleSide() {
-      onToggleSide()
+      // the folder page's frame keeps its side to itself
+      if (!embedded) onToggleSide()
     },
     startTour() {
       mounted && runTour()
@@ -95,6 +99,11 @@ function main(data: Data) {
   const fileExt = urlExtension(location.href)
   /* a Mermaid file (.mmd): the whole file is one diagram */
   const diagram = isDiagramName(location.href)
+  /* a .txt file: read as Markdown, every line break kept, and <...> shown
+     as written (a text file is not HTML) */
+  const plainText = isPlainTextName(location.href)
+  /* shown on the right of AnyRead MD's folder page */
+  const embedded = inFolderFrame()
   const codeLang =
     !diagram && sanitizeExts(configData.codeExts).includes(fileExt)
       ? codeLanguage(fileExt)
@@ -131,7 +140,8 @@ function main(data: Data) {
   setTheme(configData.pageTheme)
   document.body.classList.toggle(
     className.SIDE_COLLAPSED,
-    configData.hiddenSide,
+    // the folder page has its own tree on the left
+    embedded || configData.hiddenSide,
   )
 
   const rawContainer = getRawContainer()
@@ -161,16 +171,17 @@ function main(data: Data) {
         target.innerHTML = mdRender(code, {
           theme: toTheme(configData.pageTheme),
           plugins: diagram ? withMermaid() : configData.mdPlugins,
-          config: mdConfig.core,
+          config: plainText ? { ...mdConfig.core, ...TXT_CORE } : mdConfig.core,
           pluginOptions: mdConfig.plugins,
           ...options,
         })
       }
       const ele = target instanceof Ele ? target.ele : target
       document.title =
-        codeLang || diagram
-          ? fileName(location.pathname)
-          : ele.querySelector('h1')?.textContent.trim() ?? ''
+        (!codeLang &&
+          !diagram &&
+          ele.querySelector('h1')?.textContent.trim()) ||
+        fileName(location.pathname)
       editor?.syncTitle()
       globalEvent.emit(
         'contentRendered',
@@ -228,6 +239,7 @@ function main(data: Data) {
       resize: localize('preview_resize'),
       loading: localize('preview_loading'),
       error: localize('preview_error'),
+      tooLarge: localize('preview_too_large'),
       table: {
         size: localize('table_size'),
         truncated: localize('table_truncated'),
@@ -237,21 +249,19 @@ function main(data: Data) {
     isText: name => paneText(name),
     render(target, source, file) {
       const mdConfig = getDefaultMdConfig(configData.mdConfig)
-      // a diagram, or a text / code file shown as one block, like their own page
+      // like the file's own page: a diagram, .txt as Markdown with its line
+      // breaks, a code file as one highlighted block
       const isDiagram = isDiagramName(file)
+      const isTxt = isPlainTextName(file)
       if (isDiagram) {
         source = toCodeFence(source, 'mermaid')
-      } else if (!isMarkdownName(file)) {
-        const ext = urlExtension(file)
-        source = toCodeFence(
-          source,
-          ext === 'txt' ? 'plaintext' : codeLanguage(ext),
-        )
+      } else if (!isTxt && paneText(file)) {
+        source = toCodeFence(source, codeLanguage(urlExtension(file)))
       }
       target.innerHTML = mdRender(source, {
         theme: toTheme(configData.pageTheme),
         plugins: isDiagram ? withMermaid() : configData.mdPlugins,
-        config: mdConfig.core,
+        config: isTxt ? { ...mdConfig.core, ...TXT_CORE } : mdConfig.core,
         pluginOptions: mdConfig.plugins,
       })
       applyReading(target, configData.reading)
@@ -346,16 +356,18 @@ function main(data: Data) {
   const tocList = new Ele<HTMLElement>('ul', {
     className: className.MD_SIDE_TOC,
   })
-  const fileTree = isFileProtocol()
-    ? createFileTree(
-        {
-          up: localize('files_up'),
-          empty: localize('files_empty'),
-          error: localize('files_error'),
-        },
-        viewableMatcher(configData.codeExts),
-      )
-    : null
+  // in the folder page the tree on its left already lists the files
+  const fileTree =
+    isFileProtocol() && !embedded
+      ? createFileTree(
+          {
+            up: localize('files_up'),
+            empty: localize('files_empty'),
+            error: localize('files_error'),
+          },
+          viewableMatcher(configData.codeExts),
+        )
+      : null
   if (fileTree) {
     const tabs = new Ele<HTMLElement>('div', {
       className: className.MD_SIDE_TABS,
@@ -528,6 +540,11 @@ function main(data: Data) {
     svg(sideIcon),
   )
   sideExpandBtn.on('click', () => {
+    // in the folder page: open the outline here only, not in every tab
+    if (embedded) {
+      onToggleSide()
+      return
+    }
     safeCall(() =>
       chrome.runtime.sendMessage({
         action: 'storage',
@@ -608,8 +625,23 @@ function main(data: Data) {
   updateAnchorPosition()
   mounted = true
 
-  /* first-run quick tutorial */
-  if (!configData.tourDone) {
+  /* the folder page shows which file its right side holds */
+  if (embedded) {
+    window.parent.postMessage(
+      { type: 'anyread:shown', url: location.href.split('#')[0] },
+      '*',
+    )
+    // Esc pressed on the folder page (its tree focused) closes the pane here
+    window.addEventListener('message', e => {
+      if (e.source !== window.parent || e.data?.type !== 'anyread:esc') return
+      if (preview.isOpen && !document.querySelector(`.${className.MODAL}`)) {
+        preview.close()
+      }
+    })
+  }
+
+  /* first-run quick tutorial (on a page of its own, not in the folder page) */
+  if (!configData.tourDone && !embedded) {
     setTimeout(runTour, 800)
   }
 
@@ -850,7 +882,6 @@ function isTextDocument(): boolean {
   )
 }
 
-/** lift the style that hides the raw text while the reader loads */
 /** a link to a CSV file this page may read (local, or on the same site) */
 function tableLink(link: HTMLAnchorElement): string | null {
   try {
@@ -863,14 +894,20 @@ function tableLink(link: HTMLAnchorElement): string | null {
   }
 }
 
+/** lift the style that hides the raw text while the reader loads */
 function showPage() {
   document.documentElement.classList.add('anyread-ready')
 }
 
-storage
-  .get()
-  .then(main)
-  .catch(err => {
-    showPage()
-    throw err
-  })
+// inside another page's frame (not the folder page): the file stays as it is
+if (window.top !== window && !inFolderFrame()) {
+  showPage()
+} else {
+  storage
+    .get()
+    .then(main)
+    .catch(err => {
+      showPage()
+      throw err
+    })
+}

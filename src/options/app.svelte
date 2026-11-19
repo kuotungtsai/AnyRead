@@ -20,6 +20,7 @@
   import { clearRecent } from '@/core/recent'
   import PAGE_THEMES from '@/config/page-themes'
   import {
+    MAX_SETTINGS_FILE,
     exportSettings,
     readSettingsFile,
     settingsFileName,
@@ -192,6 +193,8 @@
     importMessage = ''
     let result: ReturnType<typeof readSettingsFile>
     try {
+      // a file this large is not a settings file: do not read it at all
+      if (file.size > MAX_SETTINGS_FILE) throw new Error('file too large')
       result = readSettingsFile(await file.text(), {
         languages: i18n.locales,
         themes: PAGE_THEMES,

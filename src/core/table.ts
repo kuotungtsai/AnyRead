@@ -10,6 +10,48 @@ export {
   isWorkbookName,
 } from './file-types'
 
+/** most bytes the pane reads of a table or text file */
+export const PANE_MAX_BYTES = 20 * 1024 * 1024
+/** most bytes the table page reads (the Download button still saves it) */
+export const PAGE_MAX_BYTES = 100 * 1024 * 1024
+/** error message for a file over the limit */
+export const TOO_LARGE = 'too large'
+
+/**
+ * A response's bytes, read only up to `max`: null when the file is larger,
+ * so a huge file is never held in memory whole.
+ */
+export async function readLimited(
+  res: Response,
+  max: number,
+): Promise<Uint8Array | null> {
+  if (Number(res.headers.get('content-length')) > max) return null
+  if (!res.body) {
+    const all = new Uint8Array(await res.arrayBuffer())
+    return all.length > max ? null : all
+  }
+  const reader = res.body.getReader()
+  const parts: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.length
+    if (total > max) {
+      reader.cancel().catch(() => {})
+      return null
+    }
+    parts.push(value)
+  }
+  const out = new Uint8Array(total)
+  let at = 0
+  for (const part of parts) {
+    out.set(part, at)
+    at += part.length
+  }
+  return out
+}
+
 /** the extension's own page that shows a table file */
 export const TABLE_PAGE = 'table.html'
 

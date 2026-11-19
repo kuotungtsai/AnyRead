@@ -92,6 +92,10 @@ export function getDefaultData(mergeData: Data = {}): Data {
     linkPreview: true,
     recentOn: true,
     ...mergeData,
+    // a language that is no longer offered (en-GB, en-US, uk) falls back
+    ...(!i18n.locales.includes(mergeData.language) && {
+      language: i18n().locale,
+    }),
     reading: getReading(mergeData.reading),
     ...(mdPlugins && { mdPlugins }),
     mdConfig: getDefaultMdConfig(mergeData.mdConfig),

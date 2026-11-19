@@ -11,8 +11,15 @@ export const TABLE_EXTS = ['csv', 'tsv', 'xlsx', 'xlsm']
 export const WORKBOOK_EXTS = ['xlsx', 'xlsm']
 /** Mermaid diagram files, drawn as a diagram */
 export const DIAGRAM_EXTS = ['mmd', 'mermaid']
-/** plain text the pane shows even when it is not one of the user's code types */
+/** plain text, shown like Markdown (line breaks kept) */
 export const TEXT_EXTS = ['txt']
+/** types AnyRead MD shows by itself; never registered again as code types */
+const BUILT_IN_EXTS = () => [
+  ...MD_EXTS,
+  ...DIAGRAM_EXTS,
+  ...TEXT_EXTS,
+  ...TABLE_EXTS,
+]
 
 /** a plain extension: letters/digits, optionally with _ + - (e.g. c, h, cpp, c++, tsx) */
 const EXT_RE = /^[a-z0-9][a-z0-9_+-]{0,15}$/
@@ -74,7 +81,7 @@ export function parseExtensions(input: string | string[] = ''): ParsedExts {
     const ext = raw.replace(/^\*?\./, '').toLowerCase()
     if (!EXT_RE.test(ext) || BLOCKED.has(ext) || exts.length >= MAX_CODE_EXTS) {
       invalid.push(raw)
-    } else if (!MD_EXTS.includes(ext) && !exts.includes(ext)) {
+    } else if (!BUILT_IN_EXTS().includes(ext) && !exts.includes(ext)) {
       exts.push(ext)
     }
   }
@@ -115,6 +122,9 @@ export const isWorkbookName = (name: string) =>
 export const isDiagramName = (name: string) =>
   DIAGRAM_EXTS.includes(urlExtension(name))
 
+export const isPlainTextName = (name: string) =>
+  TEXT_EXTS.includes(urlExtension(name))
+
 /** plain text or code the pane shows as a code block: .txt + the user's code types */
 export function textMatcher(codeExts: string[] = []) {
   const all = [...TEXT_EXTS, ...sanitizeExts(codeExts)]
@@ -126,6 +136,7 @@ export function viewableMatcher(codeExts: string[] = []) {
   const all = [
     ...MD_EXTS,
     ...DIAGRAM_EXTS,
+    ...TEXT_EXTS,
     ...TABLE_EXTS,
     ...sanitizeExts(codeExts),
   ]

@@ -8,7 +8,7 @@
  */
 import Ele from './ele'
 import className from '@/config/class-name'
-import { fileName, isMarkdownName } from './file-types'
+import { fileName } from './file-types'
 import { headingIndex, isSameFile, previewTarget } from './links'
 import { safeCall } from './runtime'
 import { isTableName, isWorkbookName } from './table'
@@ -30,6 +30,8 @@ export interface PreviewLabels {
   resize: string
   loading: string
   error: string
+  /** a file too large to show in the pane */
+  tooLarge: string
   table: TableLabels
 }
 
@@ -49,12 +51,12 @@ const stripHash = (url: string) => url.split('#')[0]
 /** a file's text, or an Excel file's sheets; null when it cannot be read */
 function readFile(
   url: string,
-): Promise<{ text?: string; sheets?: SheetData[] } | null> {
+): Promise<{ text?: string; sheets?: SheetData[]; tooLarge?: boolean } | null> {
   return new Promise(resolve => {
     const sent = safeCall(() =>
       chrome.runtime.sendMessage({ action: 'readFile', data: { url } }, res => {
         void chrome.runtime.lastError
-        resolve(res?.ok ? res : null)
+        resolve(res?.ok || res?.tooLarge ? res : null)
       }),
     )
     if (sent === undefined && !chrome.runtime?.id) resolve(null)
@@ -126,7 +128,7 @@ export function createLinkPreview(opts: PreviewOptions) {
   })
   const openHereBtn = button('open-here', labels.openHere, labels.openHereTip)
   const openBtn = button('open', labels.open, labels.open)
-  const closeBtn = button('close', labels.close, 'Esc')
+  const closeBtn = button('close', `${labels.close} (Esc)`, 'Esc')
   bar.append([backBtn, forwardBtn, title, openHereBtn, openBtn, closeBtn])
 
   // same structure as the main document so the theme applies
@@ -238,8 +240,8 @@ export function createLinkPreview(opts: PreviewOptions) {
     content.textContent = labels.loading
     const source = await readFile(file)
     if (current !== url) return // another link was clicked meanwhile
-    if (source === null) {
-      content.textContent = labels.error
+    if (source === null || source.tooLarge) {
+      content.textContent = source ? labels.tooLarge : labels.error
       return
     }
     if (isTableName(file)) {
@@ -250,7 +252,7 @@ export function createLinkPreview(opts: PreviewOptions) {
       return
     }
     opts.render(content.ele, source.text ?? '', file)
-    if (isMarkdownName(file)) rebase(content.ele, file)
+    rebase(content.ele, file)
     if (scroll !== undefined) panel.ele.scrollTop = scroll
     else scrollToAnchor(hash)
   }

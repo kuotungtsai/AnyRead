@@ -45,7 +45,8 @@ const BOOLEANS = [
 ]
 const CORE_KEYS = ['html', 'breaks', 'linkify', 'typographer']
 const MAX_CSS = 200_000
-const MAX_FILE = 1_000_000
+/** largest settings file read, in bytes (real ones are a few KB) */
+export const MAX_SETTINGS_FILE = 1_000_000
 
 export interface SettingsFile {
   app: string
@@ -103,7 +104,7 @@ export function readSettingsFile(
   text: string,
   allowed: Allowed,
 ): { settings: Record<string, unknown>; skipped: string[] } {
-  if (text.length > MAX_FILE) throw new Error('file too large')
+  if (text.length > MAX_SETTINGS_FILE) throw new Error('file too large')
   let file: unknown
   try {
     file = JSON.parse(text)

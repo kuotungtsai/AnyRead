@@ -65,3 +65,8 @@ test('text files for the pane: .txt plus the user code types', () => {
   assert.ok(!isText('data.csv'))
   assert.ok(textMatcher()('a.txt'))
 })
+
+test('types AnyRead MD shows itself never become code types', () => {
+  const { exts } = parseExtensions('txt, csv, xlsx, mmd, md, py')
+  assert.deepEqual(exts, ['py'])
+})

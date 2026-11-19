@@ -9,13 +9,17 @@ import storage from '@/core/storage'
 import i18n from '@/config/i18n'
 import { fileName } from '@/core/file-types'
 import {
+  PAGE_MAX_BYTES,
+  TOO_LARGE,
   decodeText,
   isTableName,
   isWorkbookName,
+  readLimited,
   tableSource,
 } from '@/core/table'
 import { renderSheets, renderTable } from '@/core/table-view'
 import { readXlsx } from '@/core/xlsx'
+import { inFolderFrame } from '@/core/files'
 import { toTheme } from '@/shared'
 
 const $ = (id: string) => document.getElementById(id)
@@ -36,6 +40,13 @@ async function main() {
   nameEl.textContent = name || 'AnyRead MD'
   nameEl.title = decodeSafe(src)
   document.title = name || 'AnyRead MD'
+  // on the right of the folder page: its tree marks this file
+  if (inFolderFrame()) {
+    window.parent.postMessage(
+      { type: 'anyread:shown', url: src.split('#')[0] },
+      '*',
+    )
+  }
 
   let url: URL
   try {
@@ -49,13 +60,17 @@ async function main() {
   }
 
   content.textContent = t('preview_loading')
-  let bytes: ArrayBuffer
+  let bytes: Uint8Array
   try {
     const res = await fetch(url.href)
     if (!res.ok && res.status !== 0) throw new Error(String(res.status))
-    bytes = await res.arrayBuffer()
+    bytes = await readLimited(res, PAGE_MAX_BYTES)
   } catch {
     content.textContent = t('preview_error')
+    return
+  }
+  if (!bytes) {
+    content.textContent = t('table_too_large')
     return
   }
 
@@ -67,8 +82,12 @@ async function main() {
   if (isWorkbookName(src)) {
     try {
       renderSheets(content, await readXlsx(bytes), labels, 10000)
-    } catch {
-      content.textContent = t('table_unreadable')
+    } catch (e) {
+      content.textContent = t(
+        (e as Error)?.message === TOO_LARGE
+          ? 'table_too_large'
+          : 'table_unreadable',
+      )
       return
     }
   } else {

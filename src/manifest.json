@@ -16,6 +16,10 @@
     {
       "resources": ["css/*", "fonts/*", "images/*"],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["table.html"],
+      "matches": ["file:///*"]
     }
   ],
   "background": {
@@ -61,8 +65,13 @@
         "file://*/*.MMD",
         "file://*/*.MMD?*",
         "file://*/*.MERMAID",
-        "file://*/*.MERMAID?*"
-      ]
+        "file://*/*.MERMAID?*",
+        "file://*/*.txt",
+        "file://*/*.txt?*",
+        "file://*/*.TXT",
+        "file://*/*.TXT?*"
+      ],
+      "all_frames": true
     },
     {
       "matches": ["file:///*/"],

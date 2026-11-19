@@ -11,6 +11,7 @@
  *   xl/styles.xml              number formats (dates, percentages)
  *   xl/worksheets/sheetN.xml   the cells
  */
+import { TOO_LARGE } from './table'
 
 export interface Sheet {
   name: string
@@ -60,11 +61,34 @@ function zipEntries(b: Uint8Array): Map<string, ZipEntry> {
   return entries
 }
 
+/** most bytes one part of a workbook may unpack to (a sheet's XML) */
+const MAX_XML = 64 * 1024 * 1024
+
+/** unpack a zip entry, giving up past MAX_XML (a "zip bomb" stops here) */
 async function inflate(data: Uint8Array): Promise<Uint8Array> {
   const stream = new Blob([data])
     .stream()
     .pipeThrough(new DecompressionStream('deflate-raw'))
-  return new Uint8Array(await new Response(stream).arrayBuffer())
+  const reader = stream.getReader()
+  const parts: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.length
+    if (total > MAX_XML) {
+      reader.cancel().catch(() => {})
+      throw new Error(TOO_LARGE)
+    }
+    parts.push(value)
+  }
+  const out = new Uint8Array(total)
+  let at = 0
+  for (const part of parts) {
+    out.set(part, at)
+    at += part.length
+  }
+  return out
 }
 
 async function readEntry(

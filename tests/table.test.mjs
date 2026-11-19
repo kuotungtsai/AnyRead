@@ -6,6 +6,7 @@ import {
   isTableName,
   legacyEncoding,
   parseDelimited,
+  readLimited,
   tablePageUrl,
   tableSource,
 } from './.build/table.mjs'
@@ -79,4 +80,13 @@ test('table page address round trip', () => {
   assert.ok(page.startsWith('chrome-extension://abc/table.html?src='))
   assert.equal(tableSource(page), 'file:///C:/data/%E5%A0%B1%E8%A1%A8 2026.csv')
   assert.equal(tableSource('chrome-extension://abc/table.html'), '')
+})
+
+test('readLimited stops at the limit instead of reading a huge file', async () => {
+  const body = () => new Response(new Uint8Array(10).fill(65))
+  assert.equal(await readLimited(body(), 9), null)
+  assert.deepEqual([...(await readLimited(body(), 10))], new Array(10).fill(65))
+  // a size header over the limit is refused before reading
+  const sized = new Response('abc', { headers: { 'content-length': '999' } })
+  assert.equal(await readLimited(sized, 10), null)
 })

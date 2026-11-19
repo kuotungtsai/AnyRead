@@ -13,9 +13,12 @@ import {
 } from '@/core/file-types'
 import { sameSite } from '@/core/links'
 import {
+  PANE_MAX_BYTES,
+  TOO_LARGE,
   decodeText,
   isTableName,
   isWorkbookName,
+  readLimited,
   tablePageUrl,
 } from '@/core/table'
 import { readXlsx } from '@/core/xlsx'
@@ -84,6 +87,8 @@ async function readFile(
   from?: string,
 ): Promise<{
   ok: boolean
+  /** true when the file is too large for the pane */
+  tooLarge?: boolean
   text?: string
   sheets?: { name: string; rows: string[][]; total: number }[]
 }> {
@@ -101,8 +106,18 @@ async function readFile(
       return { ok: false }
     const res = await fetch(target.href.split('#')[0])
     if (!res.ok && res.status !== 0) return { ok: false }
-    if (isWorkbookName(target.pathname)) {
-      const sheets = await readXlsx(await res.arrayBuffer())
+    if (table || plain) {
+      // never hold a huge table or text file whole in the worker
+      const bytes = await readLimited(res, PANE_MAX_BYTES)
+      if (!bytes) return { ok: false, tooLarge: true }
+      if (!isWorkbookName(name)) {
+        // CSV and old text files are often in the local encoding (Big5...)
+        return {
+          ok: true,
+          text: decodeText(bytes, chrome.i18n.getUILanguage()),
+        }
+      }
+      const sheets = await readXlsx(bytes)
       return {
         ok: true,
         sheets: sheets.map(s => ({
@@ -112,14 +127,9 @@ async function readFile(
         })),
       }
     }
-    // CSV and old text files are often in the local encoding (Big5, Shift_JIS...)
-    const text =
-      table || plain
-        ? decodeText(await res.arrayBuffer(), chrome.i18n.getUILanguage())
-        : await res.text()
-    return { ok: true, text }
-  } catch {
-    return { ok: false }
+    return { ok: true, text: await res.text() }
+  } catch (e) {
+    return { ok: false, tooLarge: (e as Error)?.message === TOO_LARGE }
   }
 }
 
@@ -247,6 +257,8 @@ async function replaceScript(id: string, matches: string[]) {
         css: ['css/content.css'],
         matches,
         runAt: 'document_idle',
+        // the folder page shows files in a frame
+        allFrames: true,
         persistAcrossSessions: true,
       },
     ])

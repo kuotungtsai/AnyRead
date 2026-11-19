@@ -7,6 +7,15 @@ import { openTablePage } from './table-open'
 export const MD_EXT_RE = /\.(md|mdx|mkd|markdown)$/i
 
 /**
+ * Name of the frame on the right of AnyRead MD's folder page. A frame keeps
+ * its name while it moves from file to file, so a page can tell it is shown
+ * there, and not inside some other page's frame (where AnyRead MD stays out).
+ */
+export const FOLDER_FRAME = 'anyread-folder'
+export const inFolderFrame = () =>
+  window.top !== window && window.name === FOLDER_FRAME
+
+/**
  * List a file:// directory by loading Chrome's directory listing page in a
  * hidden iframe. The `dir-frame` content script posts the entries back.
  */

@@ -76,6 +76,7 @@
     {
       "matches": ["file:///*/"],
       "js": ["js/dir-frame.js"],
+      "css": ["css/dir-frame.css"],
       "all_frames": true,
       "run_at": "document_idle"
     }

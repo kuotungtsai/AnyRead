@@ -39,6 +39,7 @@ import sideIcon from '@/images/icon_side.svg'
 import goTopIcon from '@/images/icon_go_top.svg'
 import editIcon from '@/images/icon_edit.svg'
 import exportIcon from '@/images/icon_export.svg'
+import closeIcon from '@/images/icon_close.svg'
 import { createLinkPreview } from '@/core/preview'
 import { openTablePage } from '@/core/table-open'
 import { headingIndex, previewTarget, sameSite } from '@/core/links'
@@ -321,6 +322,22 @@ function main(data: Data) {
           return
         }
       }
+      // in the folder page a web site would take the frame, and most sites
+      // refuse to be shown in one: it gets a tab of its own
+      if (
+        embedded &&
+        link &&
+        e.button === 0 &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        !e.altKey &&
+        /^https?:$/.test((link as HTMLAnchorElement).protocol)
+      ) {
+        e.preventDefault()
+        window.open((link as HTMLAnchorElement).href, '_blank', 'noopener')
+        return
+      }
       globalEvent.emit('click', e.target)
     },
     true,
@@ -598,15 +615,35 @@ function main(data: Data) {
   goTopBtn.hide()
   goTopBtn.on('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
 
+  /* in the folder page: close this file, back to the folder's file list */
+  const closeFile = () =>
+    window.parent.postMessage({ type: 'anyread:close' }, '*')
+  const closeFileBtn = embedded
+    ? new Ele<HTMLElement>(
+        'button',
+        {
+          className: [className.MD_BUTTON, className.CLOSE_FILE_BTN],
+          title: `${localize('editor_close')} (Esc)`,
+        },
+        svg(closeIcon),
+      )
+    : null
+  closeFileBtn?.on('click', closeFile)
+
   const buttonWrap = new Ele<HTMLElement>(
     'div',
-    { className: className.BUTTON_WRAP_ELE },
+    {
+      className: embedded
+        ? [className.BUTTON_WRAP_ELE, className.BUTTON_WRAP_CLOSABLE]
+        : className.BUTTON_WRAP_ELE,
+    },
     [
       sideExpandBtn,
       exportBtn,
       exportMenu,
       editToggleBtn,
       rawToggleBtn,
+      ...(closeFileBtn ? [closeFileBtn] : []),
       goTopBtn,
     ],
   )
@@ -631,12 +668,32 @@ function main(data: Data) {
       { type: 'anyread:shown', url: location.href.split('#')[0] },
       '*',
     )
-    // Esc pressed on the folder page (its tree focused) closes the pane here
+    // Esc closes what is on top: an image viewer, the export menu, the
+    // edit mode's text box or the split pane handle it themselves; with
+    // none of them, Esc closes this file and the folder's list comes back
+    const nothingOpen = () =>
+      !preview.isOpen &&
+      !editor.isEditing &&
+      !document.querySelector(`.${className.MODAL}`) &&
+      !document.body.classList.contains(className.SIDE_EXPANDED) &&
+      exportMenu.ele.style.display === 'none'
+    window.addEventListener(
+      'keydown',
+      e => {
+        if (e.key !== 'Escape' || e.defaultPrevented) return
+        const tag = (document.activeElement?.tagName || '').toLowerCase()
+        if (tag === 'input' || tag === 'textarea') return
+        // decided before the pane's own Esc handler closes it
+        if (nothingOpen()) closeFile()
+      },
+      true,
+    )
+    // Esc pressed on the folder page (its tree focused): the same here
     window.addEventListener('message', e => {
       if (e.source !== window.parent || e.data?.type !== 'anyread:esc') return
-      if (preview.isOpen && !document.querySelector(`.${className.MODAL}`)) {
-        preview.close()
-      }
+      if (document.querySelector(`.${className.MODAL}`)) return
+      if (preview.isOpen) preview.close()
+      else if (nothingOpen()) closeFile()
     })
   }
 

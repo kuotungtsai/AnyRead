@@ -1,0 +1,14 @@
+// Chrome draws its plain folder listing before AnyRead MD's folder page is
+// built. This style is in place before anything is drawn, so the listing
+// stays hidden until the folder page marks itself ready. If it never does
+// (an error, the folder view turned off late), the listing shows after
+// 2 seconds.
+html:not(.anyread-ready) > body {
+  visibility: hidden;
+  animation: anyread-show-dir 0s 2s forwards;
+}
+@keyframes anyread-show-dir {
+  to {
+    visibility: visible;
+  }
+}

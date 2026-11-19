@@ -37,6 +37,8 @@ export interface Data {
   codeExts?: string[]
   /** folder view: "show all files" checkbox, remembered across reloads */
   dirShowAll?: boolean
+  /** folder view: the left column hidden, remembered across reloads */
+  dirSideHidden?: boolean
   /** first-run tutorial has been shown */
   tourDone?: boolean
   /** set once saved plugin lists include NEW_PLUGINS decisions */

@@ -16,6 +16,8 @@ export default {
   BUTTON_WRAP_ELE: p`button-wrap`,
   CODE_TOGGLE_BTN: p`btn--code-toggle`,
   EDIT_TOGGLE_BTN: p`btn--edit-toggle`,
+  CLOSE_FILE_BTN: p`btn--close-file`,
+  BUTTON_WRAP_CLOSABLE: p`button-wrap--closable`,
   SIDE_EXPAND_BTN: p`btn--side-expand`,
   GO_TOP_BTN: p`btn--go-top`,
   COPY_BTN: p`btn--copy`,

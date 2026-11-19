@@ -5,6 +5,7 @@ import {
   originPattern,
   parseExtensions,
   patternsFor,
+  textMatcher,
   urlExtension,
   webBases,
 } from './.build/file-types.mjs'
@@ -54,4 +55,18 @@ test('originPattern asks for one site only', () => {
   )
   assert.equal(originPattern('file:///C:/a.md'), null)
   assert.equal(originPattern('not a url'), null)
+})
+
+test('text files for the pane: .txt plus the user code types', () => {
+  const isText = textMatcher(['py', 'c'])
+  assert.ok(isText('file:///C:/a/notes.txt'))
+  assert.ok(isText('main.PY'))
+  assert.ok(!isText('readme.md'))
+  assert.ok(!isText('data.csv'))
+  assert.ok(textMatcher()('a.txt'))
+})
+
+test('types AnyRead MD shows itself never become code types', () => {
+  const { exts } = parseExtensions('txt, csv, xlsx, mmd, md, py')
+  assert.deepEqual(exts, ['py'])
 })

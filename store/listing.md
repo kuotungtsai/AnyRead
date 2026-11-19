@@ -39,12 +39,14 @@ READ
 • Light and dark themes, syntax-highlighted code, click-to-zoom images
 • Outline side bar to jump between headings
 • Auto refresh: the page updates when you save the file in your editor
-• Links to other Markdown files open in a pane on the right, next to what you are reading
+• Links to other Markdown files open in a pane on the right, next to what you are reading; drag the divider to resize it, go back and forward, or open the file in this tab or a new one
+• CSV and Excel (.xlsx) files show as tables, in the pane or on a table page with a Download button (Chrome would only download them)
+• .txt files, code files and Mermaid diagrams (.mmd) open in the pane too
 • Font size, text width, line height and your own CSS
 • Export to PDF (print) or to a single HTML file
 
 BROWSE A WHOLE FOLDER
-• Drag a folder into a normal tab to get a searchable list of its Markdown files
+• Drag a folder into a normal tab to browse it: a file tree on the left, the file you pick on the right, the folder's README first
 • Type to filter, ↑ ↓ to select, Enter to open
 • Search inside the files of the folder
 • "Files" tab in the side bar to switch between documents in the same folder
@@ -58,12 +60,14 @@ RICH MARKDOWN
 • Mermaid diagrams (flowchart, sequence, class, state, Gantt and more)
 • KaTeX math, footnotes, task lists, callout boxes, emoji, tables with merged cells, YAML front matter
 • Turn each plugin on or off and fine-tune its options in Settings
+• .txt files are laid out as Markdown, keeping their line breaks
 • Open other text files you choose (e.g. .c, .py) as highlighted code
+• Mermaid files (.mmd) are drawn as a diagram
 
 PRIVATE BY DESIGN
 • No account, no ads, no analytics, no tracking
 • No servers: everything is rendered inside your browser
-• Settings are stored only on your device
+• Settings are stored only on your device; save them to a file and restore them on another computer
 • No access to web sites after install; you turn it on yourself if you want it
 
 SETUP
@@ -79,7 +83,7 @@ Open source, based on md-reader 2.x (MIT License). Source code: https://github.c
 **Graphic assets**
 
 - Store icon（128×128）：`store/store-icon-128.png`（96×96 圖案加 16px 透明邊，符合商店規範）
-- Screenshots（1280×800，依序上傳）：`store/screenshots/1-read.png` … `5-settings.png`
+- Screenshots（1280×800，依序上傳，商店最多 5 張）：`store/screenshots/1-split-view.png` … `5-settings.png`
 - Small promo tile（440×280）：`store/promo-440x280.png`
 
 **Additional fields**
@@ -101,12 +105,14 @@ AnyRead MD 讓 Markdown 檔案在 Chrome 裡直接變成乾淨好讀的頁面，
 • 淺色 / 深色主題、程式碼上色、點圖片可放大
 • 側邊欄大綱，點標題就跳過去
 • 自動刷新：在編輯器存檔後，頁面自動更新
-• 連到其他 Markdown 檔的連結會在右半邊開啟，原本的文件留在左邊
+• 連到其他 Markdown 檔的連結會在右半邊開啟，原本的文件留在左邊；可拖曳中間的分隔線調整寬度、回上一個 / 下一個，或改在這個分頁、新分頁開啟
+• CSV 和 Excel（.xlsx）檔顯示成表格，在右半邊或表格頁打開，表格頁有「下載」按鈕（Chrome 原本只會直接下載）
+• .txt、程式碼檔和 Mermaid 圖（.mmd）也能在右半邊打開
 • 可調整字體大小、內容寬度、行距，也能加自己的 CSS
 • 匯出成 PDF（列印）或單一 HTML 檔
 
 瀏覽整個資料夾
-• 把資料夾拖進一般分頁，就會列出裡面所有 Markdown 檔，可直接打字搜尋
+• 把資料夾拖進一般分頁就能瀏覽：左邊檔案樹，右邊顯示點的檔案，有 README 會先顯示
 • 打字篩選、↑ ↓ 選擇、Enter 開啟
 • 可搜尋資料夾裡所有檔案的內容
 • 側邊欄「檔案」分頁，切換同資料夾的其他文件
@@ -120,12 +126,14 @@ AnyRead MD 讓 Markdown 檔案在 Chrome 裡直接變成乾淨好讀的頁面，
 • Mermaid 圖表（流程圖、循序圖、類別圖、狀態圖、甘特圖等）
 • KaTeX 數學公式、註腳、核取清單、提示框、Emoji、合併儲存格表格、YAML 前置資料
 • 每個插件都能個別開關，並在設定頁調整參數
+• .txt 檔用 Markdown 排版，保留原本的換行
 • 自選其他文字檔（例如 .c、.py）以程式碼上色顯示
+• Mermaid 圖檔（.mmd）直接畫成圖
 
 重視隱私
 • 沒有帳號、沒有廣告、沒有分析、不追蹤
 • 不連任何伺服器，全部在瀏覽器裡處理
-• 設定只存在你的裝置上
+• 設定只存在你的裝置上；可以存成檔案，換電腦時再還原
 • 安裝後沒有任何網站的存取權，需要時由你自己開啟
 
 使用前設定
@@ -167,7 +175,7 @@ Display Markdown files as formatted pages in the browser, and let the user brows
 - Host permission（`file:///*`）
 
   ```
-  Needed to detect and render local Markdown files the user opens, to read the browser's own file:// folder listing for the folder view and search, to read a linked Markdown file or a picture next to the document (preview and export), and to re-read the open file for auto refresh. The user must also turn on "Allow access to file URLs".
+  Needed to detect and render local Markdown files the user opens, to read the browser's own file:// folder listing for the folder view and search, to read a linked Markdown, CSV, Excel, text or Mermaid file, or a picture next to the document (preview, table page and export), and to re-read the open file for auto refresh. The user must also turn on "Allow access to file URLs".
   ```
 
 - Optional host permission（`*://*/*`，1.1.0 起改成選用）

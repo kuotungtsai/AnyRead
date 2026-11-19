@@ -1,8 +1,19 @@
 import Ele from './ele'
 import className from '@/config/class-name'
 import type { DirEntry } from '@/dir-frame'
+import { isTableName } from './file-types'
+import { openTablePage } from './table-open'
 
 export const MD_EXT_RE = /\.(md|mdx|mkd|markdown)$/i
+
+/**
+ * Name of the frame on the right of AnyRead MD's folder page. A frame keeps
+ * its name while it moves from file to file, so a page can tell it is shown
+ * there, and not inside some other page's frame (where AnyRead MD stays out).
+ */
+export const FOLDER_FRAME = 'anyread-folder'
+export const inFolderFrame = () =>
+  window.top !== window && window.name === FOLDER_FRAME
 
 /**
  * List a file:// directory by loading Chrome's directory listing page in a
@@ -155,6 +166,20 @@ export function createFileTree(
     if (!entry.isDir) {
       if (stripUrl(entry.url) === currentFile) {
         li.classList.add(className.FILES_ACTIVE)
+      }
+      // a CSV file: Chrome would only download it
+      if (isTableName(entry.url)) {
+        icon.textContent = '▦'
+        link.on('click', (e: MouseEvent) => {
+          if (e.shiftKey || e.altKey) return
+          e.preventDefault()
+          openTablePage(entry.url, e.ctrlKey || e.metaKey)
+        })
+        link.on('auxclick', (e: MouseEvent) => {
+          if (e.button !== 1) return
+          e.preventDefault()
+          openTablePage(entry.url, true)
+        })
       }
       return li
     }

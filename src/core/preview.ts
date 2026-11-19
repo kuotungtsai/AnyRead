@@ -11,6 +11,14 @@ import className from '@/config/class-name'
 import { fileName } from './file-types'
 import { headingIndex, isSameFile, previewTarget } from './links'
 import { safeCall } from './runtime'
+import { isTableName, isWorkbookName } from './table'
+import {
+  renderSheets,
+  renderTable,
+  type SheetData,
+  type TableLabels,
+} from './table-view'
+import { openTablePage } from './table-open'
 
 export interface PreviewLabels {
   open: string
@@ -22,24 +30,33 @@ export interface PreviewLabels {
   resize: string
   loading: string
   error: string
+  /** a file too large to show in the pane */
+  tooLarge: string
+  table: TableLabels
 }
 
 export interface PreviewOptions {
   labels: PreviewLabels
-  /** render markdown source into the target with the page's settings */
-  render(target: HTMLElement, source: string): void
+  /** render a file into the target with the page's settings: Markdown, or
+   *  text / code (`file` tells which) */
+  render(target: HTMLElement, source: string, file: string): void
+  /** text files the pane shows besides Markdown and tables */
+  isText(name: string): boolean
   /** a click inside the preview (copy button, image zoom...) */
   onClick(target: HTMLElement): void
 }
 
 const stripHash = (url: string) => url.split('#')[0]
 
-function readFile(url: string): Promise<string | null> {
+/** a file's text, or an Excel file's sheets; null when it cannot be read */
+function readFile(
+  url: string,
+): Promise<{ text?: string; sheets?: SheetData[]; tooLarge?: boolean } | null> {
   return new Promise(resolve => {
     const sent = safeCall(() =>
       chrome.runtime.sendMessage({ action: 'readFile', data: { url } }, res => {
         void chrome.runtime.lastError
-        resolve(res?.ok ? res.text ?? '' : null)
+        resolve(res?.ok || res?.tooLarge ? res : null)
       }),
     )
     if (sent === undefined && !chrome.runtime?.id) resolve(null)
@@ -64,6 +81,13 @@ function rebase(root: HTMLElement, base: string) {
 /** open an address in a new tab, keeping the page being read */
 function openInNewTab(url: string) {
   window.open(url, '_blank', 'noopener')
+}
+
+/** open a file outside the pane: CSV on the table page, the rest directly */
+function openFile(url: string, newTab: boolean) {
+  if (isTableName(url)) openTablePage(url, newTab)
+  else if (newTab) openInNewTab(url)
+  else location.href = url
 }
 
 /** links the pane hands to a new tab (not mailto:, javascript: ...) */
@@ -104,7 +128,7 @@ export function createLinkPreview(opts: PreviewOptions) {
   })
   const openHereBtn = button('open-here', labels.openHere, labels.openHereTip)
   const openBtn = button('open', labels.open, labels.open)
-  const closeBtn = button('close', labels.close, 'Esc')
+  const closeBtn = button('close', `${labels.close} (Esc)`, 'Esc')
   bar.append([backBtn, forwardBtn, title, openHereBtn, openBtn, closeBtn])
 
   // same structure as the main document so the theme applies
@@ -216,11 +240,18 @@ export function createLinkPreview(opts: PreviewOptions) {
     content.textContent = labels.loading
     const source = await readFile(file)
     if (current !== url) return // another link was clicked meanwhile
-    if (source === null) {
-      content.textContent = labels.error
+    if (source === null || source.tooLarge) {
+      content.textContent = source ? labels.tooLarge : labels.error
       return
     }
-    opts.render(content.ele, source)
+    if (isTableName(file)) {
+      if (isWorkbookName(file))
+        renderSheets(content.ele, source.sheets || [], labels.table, 1000)
+      else renderTable(content.ele, source.text ?? '', file, labels.table, 1000)
+      panel.ele.scrollTop = scroll ?? 0
+      return
+    }
+    opts.render(content.ele, source.text ?? '', file)
     rebase(content.ele, file)
     if (scroll !== undefined) panel.ele.scrollTop = scroll
     else scrollToAnchor(hash)
@@ -240,10 +271,10 @@ export function createLinkPreview(opts: PreviewOptions) {
   forwardBtn.on('click', () => go(1))
   openHereBtn.on('click', () => {
     // the tab's own back button returns to the document on the left
-    if (current) location.href = current
+    if (current) openFile(current, false)
   })
   openBtn.on('click', () => {
-    if (current) openInNewTab(current)
+    if (current) openFile(current, true)
   })
   closeBtn.on('click', close)
 
@@ -266,7 +297,7 @@ export function createLinkPreview(opts: PreviewOptions) {
           scrollToAnchor(href.slice(1))
           return
         }
-        const next = previewTarget(href, current)
+        const next = previewTarget(href, current, opts.isText)
         if (next) {
           e.preventDefault()
           visit(next)
@@ -282,7 +313,7 @@ export function createLinkPreview(opts: PreviewOptions) {
         const url = (link as HTMLAnchorElement).href
         if (url && TAB_PROTOCOLS.test(new URL(url).protocol)) {
           e.preventDefault()
-          openInNewTab(url)
+          openFile(url, true)
           return
         }
       }

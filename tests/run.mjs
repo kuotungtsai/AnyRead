@@ -17,7 +17,16 @@ const src = path.join(here, '..', 'src', 'core')
 const out = path.join(here, '.build')
 
 // modules without DOM or chrome.* use at import time
-const MODULES = ['file-types', 'links', 'search', 'recent', 'reading-config']
+const MODULES = [
+  'file-types',
+  'links',
+  'search',
+  'recent',
+  'reading-config',
+  'table',
+  'xlsx',
+  'settings-file',
+]
 
 fs.rmSync(out, { recursive: true, force: true })
 fs.mkdirSync(out, { recursive: true })

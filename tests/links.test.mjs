@@ -68,3 +68,25 @@ test('only links written as links stay links', () => {
   assert.equal(isWrittenAsLink('local.mk'), false)
   assert.equal(isWrittenAsLink('setup.py'), false)
 })
+
+test('CSV, Excel and text files open in the pane too', () => {
+  assert.equal(
+    previewTarget('data.csv', page),
+    'file:///C:/docs/guide/data.csv',
+  )
+  assert.equal(
+    previewTarget('book.xlsx', page),
+    'file:///C:/docs/guide/book.xlsx',
+  )
+  assert.equal(previewTarget('notes.txt', page), null)
+  const isText = name => /\.(txt|py)$/.test(name)
+  assert.equal(
+    previewTarget('notes.txt', page, isText),
+    'file:///C:/docs/guide/notes.txt',
+  )
+  assert.equal(
+    previewTarget('../run.py', page, isText),
+    'file:///C:/docs/run.py',
+  )
+  assert.equal(previewTarget('picture.png', page, isText), null)
+})

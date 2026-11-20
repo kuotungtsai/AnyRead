@@ -66,6 +66,22 @@ try {
       if (p) await p.close().catch(() => {})
     }
   }
+  // a link to another site: a new tab, the document stays
+  {
+    const t = await clickIn(
+      '.md-reader__markdown-content a[href^="http://127.0.0.1:9/"]',
+      '/site',
+    )
+    await sleep(500)
+    ok(
+      !!t && page.url().endsWith('/links.md'),
+      'outside site: new tab, the document stays',
+    )
+    if (t) {
+      const p = await t.page().catch(() => null)
+      if (p) await p.close().catch(() => {})
+    }
+  }
   // Markdown still opens in the pane; "#" stays a jump
   await page.click('.md-reader__markdown-content a[href="sub/s.md"]')
   await page.waitForFunction(
@@ -104,6 +120,21 @@ try {
     page.url().endsWith('/pic.png'),
     'with the pane turned off: a plain link (same tab)',
   )
+  // an outside site still gets a tab of its own (not part of the pane)
+  await page.goto(`${base}/links.md`)
+  await page.waitForSelector('.md-reader__markdown-content a[href="pic.png"]')
+  await sleep(400)
+  {
+    const t = await clickIn(
+      '.md-reader__markdown-content a[href^="http://127.0.0.1:9/"]',
+      '/site',
+    )
+    await sleep(500)
+    ok(
+      !!t && page.url().endsWith('/links.md'),
+      'with the pane turned off: an outside site still opens a new tab',
+    )
+  }
 } catch (e) {
   fail++
   console.log('FAIL', e.message)

@@ -495,7 +495,7 @@ export function makeFixtures(root) {
   put('linktest/sub/s.md', '# Sub\n')
   put(
     'linktest/links.md',
-    '# Links\n\n[picture](pic.png) [pdf](doc.pdf) [folder](sub/) [other md](sub/s.md) [here](#links)\n',
+    '# Links\n\n[picture](pic.png) [pdf](doc.pdf) [folder](sub/) [other md](sub/s.md) [here](#links)\n\nAn outside site (a closed local port: nothing leaves the machine): [site](http://127.0.0.1:9/site)\n',
   )
 
   // mathtest: every way GitHub writes math, and code that only looks like it

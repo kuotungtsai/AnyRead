@@ -342,17 +342,22 @@ function main(data: Data) {
         window.open((link as HTMLAnchorElement).href, '_blank', 'noopener')
         return
       }
-      // in the folder page a web site would take the frame, and most sites
-      // refuse to be shown in one: it gets a tab of its own
+      // a link to another web site opens in a tab of its own, so the
+      // document stays (from a local file every web link is another site).
+      // In the folder page every web link does: one would take the frame,
+      // and most sites refuse to be shown in one.
+      const webLink =
+        link && /^https?:$/.test((link as HTMLAnchorElement).protocol)
+          ? (link as HTMLAnchorElement)
+          : null
       if (
-        embedded &&
-        link &&
+        webLink &&
         e.button === 0 &&
         !e.ctrlKey &&
         !e.metaKey &&
         !e.shiftKey &&
         !e.altKey &&
-        /^https?:$/.test((link as HTMLAnchorElement).protocol)
+        (embedded || webLink.origin !== location.origin)
       ) {
         e.preventDefault()
         window.open((link as HTMLAnchorElement).href, '_blank', 'noopener')

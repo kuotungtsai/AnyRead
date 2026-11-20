@@ -1,5 +1,5 @@
 // Settings file: save to a file, change settings, restore from the file.
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, outDir] = process.argv.slice(2)

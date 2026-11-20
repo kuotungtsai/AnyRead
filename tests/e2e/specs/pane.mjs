@@ -1,11 +1,12 @@
 // Real-mouse test of the linked-file pane.
 // usage: node pane.mjs <chrome.exe> <extension dir> <pane dir> <out dir>
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 
 const [exe, ext, mdDir, outDir] = process.argv.slice(2)
-const base = 'file:///' + mdDir.replace(/\\/g, '/') + '/'
+const base = pathToFileURL(mdDir).href + '/'
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 let fails = 0
 const check = (name, ok, detail = '') => {

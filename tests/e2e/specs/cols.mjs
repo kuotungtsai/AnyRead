@@ -1,11 +1,12 @@
 // Folder page in two columns: the main column lists a folder (or shows a
 // file), the left column lists the folder above it.
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, dir, outDir] = process.argv.slice(2)
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const base = 'file:///' + dir.split(String.fromCharCode(92)).join('/')
+const base = pathToFileURL(dir).href
 fs.mkdirSync(outDir, { recursive: true })
 let pass = 0,
   fail = 0
@@ -267,12 +268,10 @@ try {
     console.log(
       'cols',
       JSON.stringify(
-        await (await browser.pages())
-          .at(-1)
-          .evaluate(() => ({
-            left: document.querySelector('.mdr-side-head b')?.textContent,
-            h1: document.querySelector('.mdr-view h1')?.textContent,
-          })),
+        await (await browser.pages()).at(-1).evaluate(() => ({
+          left: document.querySelector('.mdr-side-head b')?.textContent,
+          h1: document.querySelector('.mdr-view h1')?.textContent,
+        })),
       ),
     )
   } catch {}

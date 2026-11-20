@@ -21,6 +21,33 @@ npx pnpm@9 test:e2e csv office  # only these
 - **Result**: each spec prints `PASS` / `FAIL` lines; `run.mjs` prints a
   summary and exits with 1 when a spec failed.
 
+## Other systems
+
+The specs have been run on Windows. Everything a machine may need is set
+from outside, without changing the specs (`browser.mjs` applies it):
+
+| Need                                          | Set                                                        |
+| --------------------------------------------- | ---------------------------------------------------------- |
+| No display (a server, a Pi)                   | `E2E_HEADLESS=1` (new headless mode loads extensions)      |
+| The system blocks Chromium's sandbox          | `E2E_NO_SANDBOX=1` (Ubuntu's AppArmor can do this)         |
+| No Chrome for Testing build for this platform | `CHROME=/path/to/chromium` (there is none for linux-arm64) |
+| More Chrome flags                             | `E2E_CHROME_ARGS="--flag-one --flag-two"`                  |
+
+The interface language is always Traditional Chinese (the specs compare
+texts), set both with `--lang` and with `LANGUAGE` / `LANG`, so the
+computer's own language does not matter. File addresses are built with
+`pathToFileURL`, so Linux and macOS paths work too.
+
+```bash
+E2E_HEADLESS=1 E2E_NO_SANDBOX=1 CHROME=/usr/lib/chromium/chromium npx pnpm@9 test:e2e
+```
+
+**Known:** on a Raspberry Pi (linux-arm64) with a Playwright Chromium,
+puppeteer's mouse clicks did not reach the table page's Close button inside
+the folder page, so `cols`, `hist` and `office` failed there. Clicking with
+Playwright, or calling the button's `click()`, worked: the feature is fine,
+the clicks are not. The specs keep real clicks on purpose.
+
 ## The specs
 
 | Spec        | What it checks                                                                 |

@@ -1,10 +1,11 @@
 // Folder page: web links in the shown file open a new tab; the left column hides.
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, dir, outDir] = process.argv.slice(2)
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const base = 'file:///' + dir.split(String.fromCharCode(92)).join('/')
+const base = pathToFileURL(dir).href
 fs.mkdirSync(outDir, { recursive: true })
 let pass = 0,
   fail = 0

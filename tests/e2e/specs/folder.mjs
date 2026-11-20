@@ -1,13 +1,14 @@
 // Folder page: tree on the left, the chosen file on the right; .txt as Markdown.
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, demo, demo2, outDir] = process.argv.slice(2)
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const base = 'file:///' + demo.replace(/\\/g, '/')
+const base = pathToFileURL(demo).href
 // the folder holding the fixtures: what the left column shows above demo/
 const parentName = path.basename(path.dirname(path.resolve(demo)))
-const base2 = 'file:///' + demo2.replace(/\\/g, '/')
+const base2 = pathToFileURL(demo2).href
 let pass = 0,
   fail = 0
 const ok = (c, m) => {

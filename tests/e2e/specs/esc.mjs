@@ -1,10 +1,11 @@
 // Esc closes the split pane: on a page of its own, and inside the folder page
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, demo, outDir] = process.argv.slice(2)
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const base = 'file:///' + demo.replace(/\\/g, '/')
+const base = pathToFileURL(demo).href
 fs.mkdirSync(outDir, { recursive: true })
 let pass = 0,
   fail = 0

@@ -19,7 +19,8 @@ npx pnpm@9 run build                   # version into the manifest, build, dist/
 The browser tests load `extension/` into Chrome for Testing, downloaded once
 into `tests/e2e/.cache/` (or set `CHROME` to a Chrome for Testing / Chromium
 executable; a branded Chrome no longer loads unpacked extensions from the
-command line). They open real windows. Their files are made up and written
+command line). They open real windows (`E2E_HEADLESS=1` for none, and the
+other switches for Linux are in the tests README). Their files are made up and written
 fresh into `tests/e2e/.work/` on every run. See
 [tests/e2e/README.md](tests/e2e/README.md).
 

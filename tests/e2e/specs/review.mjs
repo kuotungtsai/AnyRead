@@ -1,12 +1,13 @@
 // The review fixes: other pages' frames, tree mark for tables, size limits,
 // live theme on the folder page.
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, demo, big, outDir] = process.argv.slice(2)
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const base = 'file:///' + demo.replace(/\\/g, '/')
-const bigBase = 'file:///' + big.replace(/\\/g, '/')
+const base = pathToFileURL(demo).href
+const bigBase = pathToFileURL(big).href
 fs.mkdirSync(outDir, { recursive: true })
 let pass = 0,
   fail = 0

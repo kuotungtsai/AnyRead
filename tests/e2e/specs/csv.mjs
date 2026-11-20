@@ -1,9 +1,10 @@
-import puppeteer from 'puppeteer-core'
+import puppeteer from '../browser.mjs'
+import { pathToFileURL } from 'node:url'
 import fs from 'fs'
 import path from 'path'
 const [exe, ext, dir] = process.argv.slice(2)
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const base = 'file:///' + dir.replace(/\\/g, '/')
+const base = pathToFileURL(dir).href
 let pass = 0,
   fail = 0
 const ok = (c, m) => {

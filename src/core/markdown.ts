@@ -17,6 +17,7 @@ import mKatex from '@traptitech/markdown-it-katex'
 import mMermaid from '@/plugins/mermaid-block'
 import mAlert from '@/plugins/alert'
 import mGraphvizBlock from '@/plugins/graphviz-block'
+import mMathGithub from '@/plugins/math-github'
 import mMultimdTable from 'markdown-it-multimd-table'
 import MD_PLUGINS from '@/config/md-plugins'
 import successIcon from '@/images/icon_success.svg'
@@ -176,6 +177,12 @@ function initRender({
     // Install after diagram plugins so Graphviz can override Mermaid fences when
     // the block content is actually DOT syntax.
     md.use(mGraphvizBlock)
+  }
+
+  if (plugins.includes('Katex')) {
+    // GitHub's ```math blocks and $`...`$ inline, drawn like $$ and $.
+    // Installed last so it sees the fence after Mermaid / Graphviz.
+    md.use(mMathGithub)
   }
 
   return md

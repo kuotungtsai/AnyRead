@@ -67,6 +67,7 @@ the clicks are not. The specs keep real clicks on purpose.
 | `flash`     | no flash of Chrome's own listing on reload                                     |
 | `office`    | Word and PowerPoint in the pane, the table page and the folder page            |
 | `mainlinks` | links to other local files open a new tab and keep the document                |
+| `math`      | `$`, `$$`, ` ```math ` and `` $`…`$ `` formulas; code with `$` left alone      |
 
 ## Writing a spec
 

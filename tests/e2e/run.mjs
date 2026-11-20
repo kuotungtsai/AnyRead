@@ -46,6 +46,7 @@ const SPECS = {
   folder: () => [w('demo'), w('demo2'), out('folder')], // folder page: files, .txt, sub folders
   hist: () => [w('histtest'), out('hist')], // Back / Forward on the folder page
   mainlinks: () => [w('linktest'), out('mainlinks')], // other local links open a new tab
+  math: () => [w('mathtest'), out('math')], // $, $$, ```math and $`...`$ formulas
   office: () => [w('officetest'), out('office')], // Word and PowerPoint
   openhere: () => [w('pane'), out('openhere')], // the pane's "Open here"
   pane: () => [w('pane'), out('pane')], // the linked-file pane

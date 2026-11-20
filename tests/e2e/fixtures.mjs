@@ -497,6 +497,41 @@ export function makeFixtures(root) {
     'linktest/links.md',
     '# Links\n\n[picture](pic.png) [pdf](doc.pdf) [folder](sub/) [other md](sub/s.md) [here](#links)\n',
   )
+
+  // mathtest: every way GitHub writes math, and code that only looks like it
+  put(
+    'mathtest/math.md',
+    [
+      '# Math',
+      '',
+      'Dollar inline: $E = mc^2$ and GitHub inline: $`\\sqrt{2}`$.',
+      '',
+      'Dollar block:',
+      '',
+      '$$',
+      '\\nabla^2 P + k^2 P = 0',
+      '$$',
+      '',
+      'GitHub block:',
+      '',
+      '```math',
+      '\\frac{\\partial P}{\\partial n} = 0',
+      '```',
+      '',
+      'A broken one stays readable:',
+      '',
+      '```math',
+      '\\frac{1}{',
+      '```',
+      '',
+      'Plain code is left alone: `$x$` and',
+      '',
+      '```js',
+      'const price = `$${cost}`',
+      '```',
+      '',
+    ].join('\n'),
+  )
 }
 
 if (

@@ -49,6 +49,18 @@ try {
   )
   const page = await browser.newPage()
   page.on('pageerror', e => errors.push(e.message))
+  // Back / Forward through the page's history (the same entries the
+  // browser's buttons step through), without puppeteer's wait for a
+  // top-level navigation: most steps here only move the frame inside the
+  // folder page, and that wait sat out its 30 s on each. The checks after
+  // each step wait for the page they expect.
+  const step = n =>
+    page
+      .evaluate(n => setTimeout(() => history.go(n), 0), n)
+      .then(() => sleep(300))
+      .catch(() => sleep(300))
+  const back = () => step(-1)
+  const forward = () => step(1)
   const fr = () => page.frames().find(f => f.name() === 'anyread-folder')
   const state = () =>
     page.evaluate(() => ({
@@ -106,13 +118,13 @@ try {
     closeBtn === '關閉 (Esc)',
     'table page in the folder has Close: ' + closeBtn,
   )
-  await page.goBack()
+  await back()
   await waitFor(isList, 'back to list')
   ok(
     (await state()).url.endsWith('/nolist/'),
     'Back from the xlsx: the file list, same folder page',
   )
-  await page.goForward()
+  await forward()
   await waitFor(shows('book.xlsx'), 'forward to xlsx')
   await waitFor(
     () =>
@@ -169,7 +181,7 @@ try {
   )
   await tree('book.xlsx')
   await waitFor(shows('book.xlsx'), 'xlsx')
-  await page.goBack()
+  await back()
   await waitFor(shows('a.md'), 'back to a.md')
   await sleep(1500)
   console.log(
@@ -207,14 +219,14 @@ try {
   )
   await fr().click('.md-reader__preview-bar button[data-act="open-here"]')
   await waitFor(shows('b.md'), 'b.md in frame')
-  await page.goBack()
+  await back()
   await waitFor(shows('a.md'), 'back to a after open here')
   ok(true, 'Open here inside the frame, then Back: a.md, tree marks it')
-  await page.goForward()
+  await forward()
   await waitFor(shows('b.md'), 'forward b')
   await tree('data.csv')
   await waitFor(shows('data.csv'), 'csv after b')
-  await page.goBack()
+  await back()
   await waitFor(shows('b.md'), 'back to b')
   await waitFor(
     async () =>
@@ -233,7 +245,7 @@ try {
   let steps = 0,
     okSteps = true
   while (steps < 30) {
-    await page.goBack()
+    await back()
     await sleep(700)
     steps++
     if (page.url().endsWith('/start.md')) break
@@ -258,7 +270,7 @@ try {
   await waitFor(shows('README.md'), 'readme opened')
   await tree('book.xlsx')
   await waitFor(shows('book.xlsx'), 'xlsx 2')
-  await page.goBack()
+  await back()
   await waitFor(shows('README.md'), 'back to readme')
   ok(true, 'folder with README: Back from the xlsx shows README again')
 

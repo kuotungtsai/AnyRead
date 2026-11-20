@@ -101,10 +101,13 @@ for (const name of wanted.length ? wanted : Object.keys(SPECS)) {
   const run = spawnSync(
     process.execPath,
     [path.join(here, 'specs', `${name}.mjs`), exe, ext, ...SPECS[name]()],
-    { cwd: here, encoding: 'utf8', timeout: 10 * 60 * 1000 },
+    { cwd: here, encoding: 'utf8', timeout: 5 * 60 * 1000 },
   )
   const text = (run.stdout || '') + (run.stderr || '')
   process.stdout.write(text)
+  if (run.error?.code === 'ETIMEDOUT') {
+    console.log(`FAIL ${name} timed out after 5 minutes`)
+  }
   // a spec prints "PASS ..." / "FAIL ..." lines and a summary
   const failed =
     run.status !== 0 ||

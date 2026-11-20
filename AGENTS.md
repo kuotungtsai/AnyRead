@@ -46,6 +46,25 @@ were found by using the extension. So:
 6. **Say what was not verified.** End with the parts no test or check
    covered, so a person can look at them.
 
+## No personal data in commits
+
+This repository is public. Every commit runs `scripts/check-private.mjs`
+(husky `pre-commit` and `commit-msg` hooks): it blocks home folders with a
+user name in them, e-mail addresses (other than no-reply and example ones),
+private network addresses, keys and tokens, in added lines, file names and
+the commit message. Words of the owner's own (an employer, internal names)
+are in `<git dir>/sensitive-words.txt`, which is never committed; when the
+file is there they are blocked too.
+
+- Never skip the hooks (`--no-verify`) and never edit the check to let
+  something through. If it says BLOCKED, remove the data.
+- Before pushing, run `npx pnpm@9 check:private --since origin/main`: it
+  checks everything about to go up, commit messages included.
+- Pictures it lists under REVIEW: open and look at each one. A screenshot
+  can show names, folders or documents that no text check sees.
+- Test files are invented (see `tests/e2e/fixtures.mjs`); real documents
+  only ever stay outside the repository.
+
 ## Ground rules
 
 - **Light.** No outside services, analytics or network calls of our own.

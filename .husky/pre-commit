@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Personal data (home folders, e-mail, private addresses, keys, and the words
+# in <git dir>/sensitive-words.txt) must not be committed.
+node scripts/check-private.mjs || exit 1
+
 # Optional local check kept outside version control (.git/company-guard.sh).
 guard="$(git rev-parse --git-common-dir)/company-guard.sh"
 if [ -f "$guard" ]; then sh "$guard" || exit 1; fi

@@ -19,6 +19,7 @@
     "build:zip": "node ./scripts/pack-share.mjs",
     "lint": "prettier --write --ignore-unknown",
     "test": "node tests/run.mjs",
+    "test:e2e": "node tests/e2e/run.mjs",
     "preinstall": "node ./scripts/preinstall.mjs",
     "prepare": "husky install",
     "pack:share": "webpack --config ./build/webpack.prod.js && node ./scripts/pack-share.mjs",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@nuxt/friendly-errors-webpack-plugin": "^2.5.2",
+    "@puppeteer/browsers": "2.6.1",
     "@tsconfig/svelte": "^5.0.0",
     "@types/chrome": "^0.0.196",
     "@types/node": "^18.7.14",
@@ -41,6 +43,7 @@
     "mini-css-extract-plugin": "^2.6.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
+    "puppeteer-core": "23.11.1",
     "svelte-loader": "^3.2.4",
     "svg-loader": "^0.0.2",
     "typescript": "^5.9.3",

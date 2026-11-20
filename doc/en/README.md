@@ -86,6 +86,9 @@ npx pnpm@9 run dev
 # Run the unit tests
 npx pnpm@9 test
 
+# Run the browser tests (build first; Chrome for Testing is downloaded once, see tests/e2e/README.md)
+npx pnpm@9 test:e2e
+
 # Build and pack the zip to share: dist/anyread-md-<version>.zip
 npx pnpm@9 run pack:share
 

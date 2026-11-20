@@ -86,6 +86,9 @@ npx pnpm@9 run dev
 # 跑單元測試
 npx pnpm@9 test
 
+# 跑瀏覽器測試（先建置；第一次會下載 Chrome for Testing，說明見 tests/e2e/README.md）
+npx pnpm@9 test:e2e
+
 # 建置並打包成要分享的 zip：dist/anyread-md-<版本>.zip
 npx pnpm@9 run pack:share
 

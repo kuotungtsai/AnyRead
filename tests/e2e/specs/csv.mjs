@@ -358,9 +358,12 @@ try {
       ),
     { timeout: 8000 },
   )
+  // open the data folder in the tree with its ▸ (its name now opens the
+  // folder page instead)
   await page.evaluate(() =>
     [...document.querySelectorAll('.md-reader__files a')]
       .find(a => a.textContent.includes('data'))
+      .querySelector('.md-reader__files-icon')
       .click(),
   )
   await page.waitForFunction(

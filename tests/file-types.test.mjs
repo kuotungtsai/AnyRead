@@ -70,3 +70,22 @@ test('types AnyRead MD shows itself never become code types', () => {
   const { exts } = parseExtensions('txt, csv, xlsx, mmd, md, py')
   assert.deepEqual(exts, ['py'])
 })
+
+test('parentFolder: up one folder, stopping at a drive, a share or the root', async () => {
+  const { parentFolder } = await import('./.build/file-types.mjs')
+  assert.equal(parentFolder('file:///C:/docs/notes/'), 'file:///C:/docs/')
+  assert.equal(parentFolder('file:///C:/docs/'), 'file:///C:/')
+  assert.equal(parentFolder('file:///C:/'), null, 'Windows drive: the top')
+  assert.equal(parentFolder('file:///d:/'), null)
+  assert.equal(parentFolder('file://server/share/a/'), 'file://server/share/')
+  assert.equal(parentFolder('file://server/share/'), null, 'share: the top')
+  assert.equal(parentFolder('file:///srv/data/'), 'file:///srv/')
+  assert.equal(
+    parentFolder('file:///srv/'),
+    'file:///',
+    'Linux / macOS: up to /',
+  )
+  assert.equal(parentFolder('file:///'), null, 'the root')
+  assert.equal(parentFolder('file:///C:/a%20b/c/'), 'file:///C:/a%20b/')
+  assert.equal(parentFolder('not a url'), null)
+})

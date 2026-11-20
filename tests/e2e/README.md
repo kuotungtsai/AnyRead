@@ -60,6 +60,8 @@ the clicks are not. The specs keep real clicks on purpose.
 | `review`    | other pages' frames left alone; size limits; the folder page's live theme      |
 | `settings`  | saving and restoring the settings file                                         |
 | `folder`    | the folder page: files, `.txt`, tables, diagrams, sub folders, Close           |
+| `filesup`   | the side bar's Files tab: ↑ stops at the drive (or /) with files listed        |
+| `filesdir`  | the Files tab: a folder's name opens its folder page, ▸ opens it in place      |
 | `cols`      | the two columns: down, up, ▸, breadcrumb, Back; the drive root (Windows only)  |
 | `hist`      | Back / Forward through the folder page, a late page after a quick Back         |
 | `closemd`   | Close (Esc) for a file in the folder page; Esc with the pane or edit mode open |

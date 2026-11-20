@@ -406,6 +406,7 @@ function main(data: Data) {
             up: localize('files_up'),
             empty: localize('files_empty'),
             error: localize('files_error'),
+            expand: localize('files_expand'),
           },
           viewableMatcher(configData.codeExts),
         )

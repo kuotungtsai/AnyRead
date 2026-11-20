@@ -1,7 +1,7 @@
 import Ele from './ele'
 import className from '@/config/class-name'
 import type { DirEntry } from '@/dir-frame'
-import { isOfficeName, isPageName } from './file-types'
+import { isOfficeName, isPageName, parentFolder } from './file-types'
 import { openTablePage } from './table-open'
 
 export const MD_EXT_RE = /\.(md|mdx|mkd|markdown)$/i
@@ -51,7 +51,6 @@ export function listDir(dirUrl: string, timeout = 8000): Promise<DirEntry[]> {
 
 const stripUrl = (url: string) => url.split('#')[0].split('?')[0]
 const dirOf = (url: string) => stripUrl(url).replace(/[^/]*$/, '')
-const parentDirOf = (dir: string) => dir.replace(/[^/]+\/$/, '') || dir
 const decode = (s: string) => {
   try {
     return decodeURIComponent(s)
@@ -91,6 +90,8 @@ export function createFileTree(
     up: string
     empty: string
     error: string
+    /** "Open here" for the ▸ in front of a folder */
+    expand: string
   },
   /** files listed in the tree: markdown by default */
   isViewable: (name: string) => boolean = name => MD_EXT_RE.test(name),
@@ -112,16 +113,19 @@ export function createFileTree(
       title: labels.up,
     })
     up.textContent = '↑'
+    // greyed out at the top of a drive, a share or / (nothing is listed above)
+    const parent = parentFolder(rootDir)
+    if (!parent) up.ele.setAttribute('disabled', '')
     up.on('click', () => {
-      const parent = parentDirOf(rootDir)
-      if (parent !== rootDir) {
-        rootDir = parent
-        load()
-      }
+      if (!parent) return
+      rootDir = parent
+      load()
     })
-    const title = new Ele<HTMLElement>('span', {
+    // the folder's name opens its folder page (Ctrl+click: a new tab)
+    const title = new Ele<HTMLElement>('a', {
       className: className.FILES_TITLE,
       title: decode(rootDir),
+      href: rootDir,
     })
     title.textContent = dirName(rootDir)
     header.append([up, title])
@@ -184,9 +188,14 @@ export function createFileTree(
       return li
     }
 
+    // a folder: its name is a link to its folder page (the browser opens it,
+    // in this tab or, with Ctrl or the middle button, a new one); ▸ opens it
+    // here in the tree
+    icon.ele.setAttribute('title', labels.expand)
     let children: Ele<HTMLElement> = null
     let expanded = false
-    link.on('click', async (e: Event) => {
+    link.on('click', async (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(`.${className.FILES_ICON}`)) return
       e.preventDefault()
       expanded = !expanded
       icon.textContent = expanded ? '▾' : '▸'

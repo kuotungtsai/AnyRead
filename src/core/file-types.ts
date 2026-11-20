@@ -211,3 +211,24 @@ export function originPattern(url: string): string | null {
     return null
   }
 }
+
+/**
+ * The folder above a file:// folder, or null at the top: a Windows drive
+ * (file:///C:/ — above it Chrome lists nothing), a network share
+ * (file://server/share/) or the root (file:///). On Linux and macOS a
+ * first-level folder such as file:///srv/ goes up to file:///.
+ */
+export function parentFolder(dir: string): string | null {
+  let url: URL
+  try {
+    url = new URL(dir)
+  } catch {
+    return null
+  }
+  const parts = url.pathname.split('/').filter(Boolean)
+  if (!parts.length) return null
+  if (parts.length === 1 && (url.host || /^[A-Za-z]:$/.test(parts[0]))) {
+    return null
+  }
+  return new URL('../', url.href.replace(/[?#].*$/, '')).href
+}

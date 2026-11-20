@@ -18,6 +18,7 @@ import {
   isOfficeName,
   isPageName,
   isTableName,
+  parentFolder,
   viewableMatcher,
 } from '@/core/file-types'
 import { openTablePage } from '@/core/table-open'
@@ -225,8 +226,7 @@ async function topMode() {
       return decode(p[p.length - 1] || '/')
     }
     /** the folder above, or null at the top of a drive */
-    const parentOf = (url: string) =>
-      pathParts(url).length > 1 ? new URL('../', url).href : null
+    const parentOf = (url: string) => parentFolder(url)
     const same = (a: string, b: string) =>
       !!a && !!b && decode(a.split('#')[0]) === decode(b.split('#')[0])
     const listings = new Map<string, Promise<DirEntry[]>>([

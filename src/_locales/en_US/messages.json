@@ -3,7 +3,7 @@
     "message": "AnyRead – Browse & Read Local Files"
   },
   "ext_desc": {
-    "message": "Browse local folders and read Markdown, CSV, Excel, Word, PowerPoint, JSON and more in Chrome. Nothing leaves your computer."
+    "message": "Browse local folders and read documents, spreadsheets, slides and Markdown right in Chrome. Nothing leaves your computer."
   },
   "command_toggle_side": {
     "message": "Toggle side"

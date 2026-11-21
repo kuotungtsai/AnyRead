@@ -3,7 +3,7 @@
     "message": "AnyRead – 로컬 파일 탐색과 읽기"
   },
   "ext_desc": {
-    "message": "Chrome에서 로컬 폴더를 탐색하고 Markdown, CSV, Excel, Word, PowerPoint, JSON 등을 바로 봅니다. Markdown은 편집도 됩니다. 모든 처리는 내 컴퓨터에서만 이루어집니다."
+    "message": "Chrome에서 로컬 폴더를 탐색하고 문서, 표, 슬라이드, Markdown을 바로 봅니다. Markdown은 편집도 됩니다. 모든 처리는 내 컴퓨터에서만 이루어집니다."
   },
   "command_toggle_side": {
     "message": "토글 사이드바"

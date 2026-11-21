@@ -89,13 +89,13 @@ export function exportSettings(
   }
 }
 
-/** file name for a settings file saved on `now`: anyread-md-settings-2026-11-18.json */
+/** file name for a settings file saved on `now`: anyread-settings-2026-11-18.json */
 export function settingsFileName(now = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   const day = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
     now.getDate(),
   )}`
-  return `anyread-md-settings-${day}.json`
+  return `anyread-settings-${day}.json`
 }
 
 const isObject = (v: unknown): v is Record<string, unknown> =>

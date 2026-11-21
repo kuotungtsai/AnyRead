@@ -89,7 +89,7 @@ try {
     await sleep(200)
     const f = fs
       .readdirSync(dl)
-      .find(n => /^anyread-md-settings-\d{4}-\d\d-\d\d\.json$/.test(n))
+      .find(n => /^anyread-settings-\d{4}-\d\d-\d\d\.json$/.test(n))
     if (f) saved = path.join(dl, f)
   }
   ok(!!saved, 'settings file downloaded: ' + (saved && path.basename(saved)))

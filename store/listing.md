@@ -19,19 +19,25 @@
 **Name**（從 manifest 自動帶入）
 
 ```
-AnyRead MD
+AnyRead – Browse & Read Local Files
 ```
 
 **Summary**（manifest 的 description，132 字元內，自動帶入）
 
 ```
-Read, browse and edit Markdown files in Chrome. Folder view, diagrams and math; everything stays on your computer.
+Browse local folders and read Markdown, CSV, Excel, Word, PowerPoint, JSON and more in Chrome. Nothing leaves your computer.
 ```
 
 **Description**
 
 ```
-AnyRead MD turns Markdown files into clean, readable pages right in Chrome, and lets you browse and edit them without leaving the browser. It is free, needs no account and never sends your files anywhere.
+AnyRead lets you browse the folders on your computer and read the files in them right in Chrome: Markdown, CSV and Excel tables, Word and PowerPoint, JSON, YAML and more, files Chrome would otherwise only download. Markdown files can be edited too. It is free, needs no account and never sends your files anywhere.
+
+BROWSE A WHOLE FOLDER
+• Drag a folder into a normal tab to browse it: its files in the main column, the folder above on the left; files open right there
+• Type to filter, ↑ ↓ to select, Enter to open
+• Search inside the files of the folder
+• "Files" tab in the side bar to switch between documents in the same folder
 
 READ
 • Open local .md / .markdown files (file://)
@@ -46,12 +52,6 @@ READ
 • .txt files, code files and Mermaid diagrams (.mmd) open in the pane too
 • Font size, text width, line height and your own CSS
 • Export to PDF (print) or to a single HTML file
-
-BROWSE A WHOLE FOLDER
-• Drag a folder into a normal tab to browse it: its files in the main column, the folder above on the left; files open right there
-• Type to filter, ↑ ↓ to select, Enter to open
-• Search inside the files of the folder
-• "Files" tab in the side bar to switch between documents in the same folder
 
 EDIT
 • Alt+Shift+E opens a split editor with live preview
@@ -100,7 +100,13 @@ Open source, based on md-reader 2.x (MIT License). Source code: https://github.c
 在 Store listing 右上角的語言選單新增 Chinese (Traditional)，貼上：
 
 ```
-AnyRead MD 讓 Markdown 檔案在 Chrome 裡直接變成乾淨好讀的頁面，還能瀏覽整個資料夾、直接編輯。完全免費、不需要帳號，檔案也不會傳到任何地方。
+AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔案：Markdown、CSV 和 Excel 表格、Word 和 PowerPoint、JSON、YAML 等，這些 Chrome 原本只會下載的檔案都能打開，Markdown 還能直接編輯。完全免費、不需要帳號，檔案也不會傳到任何地方。
+
+瀏覽整個資料夾
+• 把資料夾拖進一般分頁就能瀏覽：右邊是資料夾的檔案，左邊是上一層；點的檔案直接在右邊顯示
+• 打字篩選、↑ ↓ 選擇、Enter 開啟
+• 可搜尋資料夾裡所有檔案的內容
+• 側邊欄「檔案」分頁，切換同資料夾的其他文件
 
 閱讀
 • 開啟本機的 .md / .markdown 檔（file://）
@@ -115,12 +121,6 @@ AnyRead MD 讓 Markdown 檔案在 Chrome 裡直接變成乾淨好讀的頁面，
 • .txt、程式碼檔和 Mermaid 圖（.mmd）也能在右半邊打開
 • 可調整字體大小、內容寬度、行距，也能加自己的 CSS
 • 匯出成 PDF（列印）或單一 HTML 檔
-
-瀏覽整個資料夾
-• 把資料夾拖進一般分頁就能瀏覽：右邊是資料夾的檔案，左邊是上一層；點的檔案直接在右邊顯示
-• 打字篩選、↑ ↓ 選擇、Enter 開啟
-• 可搜尋資料夾裡所有檔案的內容
-• 側邊欄「檔案」分頁，切換同資料夾的其他文件
 
 編輯
 • Alt+Shift+E 開啟左右分割編輯器，右邊即時預覽
@@ -154,7 +154,7 @@ AnyRead MD 讓 Markdown 檔案在 Chrome 裡直接變成乾淨好讀的頁面，
 **Single purpose**
 
 ```
-Display Markdown files as formatted pages in the browser, and let the user browse the Markdown files in a local folder and edit them.
+Let the user browse local folders and read the files in them (Markdown, tables, documents, data files) as formatted pages in the browser, and edit Markdown files.
 ```
 
 **Permission justification**

@@ -39,13 +39,13 @@ https://www.eclipse.org/legal/epl-v10.html
 
 Source code for Graphviz is available from https://graphviz.org/ and
 https://gitlab.com/graphviz/graphviz . Graphviz has not been modified by
-AnyRead MD.
+AnyRead.
 
 Graphviz is provided "AS IS", WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. The Graphviz contributors disclaim all liability
 for damages, including direct, indirect, special, incidental and
-consequential damages. Any provisions in the AnyRead MD license that
-differ from the Eclipse Public License are offered by the AnyRead MD
+consequential damages. Any provisions in the AnyRead license that
+differ from the Eclipse Public License are offered by the AnyRead
 authors alone and not by any Graphviz contributor.`,
   },
   {

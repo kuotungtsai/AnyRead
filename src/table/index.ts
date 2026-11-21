@@ -40,9 +40,9 @@ async function main() {
   const download = $('download') as HTMLButtonElement
   download.textContent = t('table_download')
   download.title = t('table_download_tip')
-  nameEl.textContent = name || 'AnyRead MD'
+  nameEl.textContent = name || 'AnyRead'
   nameEl.title = decodeSafe(src)
-  document.title = name || 'AnyRead MD'
+  document.title = name || 'AnyRead'
   // on the right of the folder page: its tree marks this file, and Close
   // (or Esc, here or in the tree) goes back to the folder's file list
   if (inFolderFrame()) {

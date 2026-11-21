@@ -101,7 +101,7 @@ function main(data: Data) {
   /* a .txt file: read as Markdown, every line break kept, and <...> shown
      as written (a text file is not HTML) */
   const plainText = isPlainTextName(location.href)
-  /* shown on the right of AnyRead MD's folder page */
+  /* shown on the right of AnyRead's folder page */
   const embedded = inFolderFrame()
   /* data, settings and log files, dotfiles, and the user's code types */
   const codeLang = !diagram

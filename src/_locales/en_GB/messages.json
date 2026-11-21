@@ -1,9 +1,9 @@
 {
   "ext_name": {
-    "message": "AnyRead MD"
+    "message": "AnyRead – Browse & Read Local Files"
   },
   "ext_desc": {
-    "message": "Read, browse and edit Markdown files in Chrome. Folder view, diagrams and math; everything stays on your computer."
+    "message": "Browse local folders and read Markdown, CSV, Excel, Word, PowerPoint, JSON and more in Chrome. Nothing leaves your computer."
   },
   "command_toggle_side": {
     "message": "Toggle side"

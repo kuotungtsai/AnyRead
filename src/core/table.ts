@@ -1,6 +1,6 @@
 /**
  * Table files (CSV / TSV). Chrome downloads these instead of showing them,
- * so AnyRead MD shows them itself: in the pane next to a document, or on its
+ * so AnyRead shows them itself: in the pane next to a document, or on its
  * own table page. Pure helpers only (no DOM, no chrome.*), easy to test.
  */
 export {

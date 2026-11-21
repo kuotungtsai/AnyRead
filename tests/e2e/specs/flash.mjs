@@ -1,5 +1,5 @@
 // Folder page reload: Chrome's plain listing is never painted visible
-// before AnyRead MD's folder page is ready.
+// before AnyRead's folder page is ready.
 import puppeteer from '../browser.mjs'
 import { pathToFileURL } from 'node:url'
 import fs from 'fs'

@@ -1,9 +1,9 @@
-# AnyRead MD Privacy Policy
+# AnyRead Privacy Policy
 
 Last updated: 2026-11-18
 
-AnyRead MD is a browser extension that displays, browses and edits Markdown
-files. It is free, has no accounts and does not collect any data.
+AnyRead is a browser extension that browses local folders, displays the
+files in them and edits Markdown files. It is free, has no accounts and does not collect any data.
 
 ## What the extension does with your data
 
@@ -69,11 +69,11 @@ Questions: open an issue at <https://github.com/kuotungtsai/AnyRead-MD/issues>.
 
 ---
 
-# AnyRead MD 隱私權政策
+# AnyRead 隱私權政策
 
 最後更新：2026-11-18
 
-AnyRead MD 是用來顯示、瀏覽和編輯 Markdown 檔案的瀏覽器擴充功能。完全免費、
+AnyRead 是用來瀏覽本機資料夾、顯示裡面的檔案和編輯 Markdown 檔案的瀏覽器擴充功能。完全免費、
 不需要帳號，也**不收集任何資料**。
 
 - **不收集資料**：不收集、儲存、販售或分享任何個人資料、瀏覽紀錄、檔案內容或

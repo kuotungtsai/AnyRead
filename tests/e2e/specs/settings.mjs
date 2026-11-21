@@ -188,7 +188,7 @@ try {
     { timeout: 5000 },
   )
   const badMsg = await page.$eval('.import-message', e => e.textContent)
-  ok(badMsg === '這不是 AnyRead MD 的設定檔。', 'bad file message: ' + badMsg)
+  ok(badMsg === '這不是 AnyRead 的設定檔。', 'bad file message: ' + badMsg)
   ok((await read()).pageTheme === 'light', 'bad file changes nothing')
 
   // unknown keys are listed

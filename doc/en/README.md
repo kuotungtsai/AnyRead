@@ -1,10 +1,10 @@
 English | [繁體中文](../../README.md)
 
-# AnyRead MD
+# AnyRead
 
-<img alt="AnyRead MD" src="../../src/images/icon.svg" align="right" width="110">
+<img alt="AnyRead" src="../../src/images/icon.svg" align="right" width="110">
 
-A Chrome extension to read, browse and edit Markdown files.
+A Chrome extension to browse the folders on your computer and read the files in them: Markdown, CSV and Excel tables, Word, PowerPoint, JSON, YAML and other files Chrome would only download. Markdown files can be edited too.
 Everything is handled on your computer: **no account, no tracking, and no connection to any outside server.**
 
 > Fork of the open-source [md-reader](https://github.com/md-reader/md-reader) 2.x (MIT).
@@ -13,7 +13,7 @@ Everything is handled on your computer: **no account, no tracking, and no connec
 
 - **Reading**: local Markdown files (`.md`, `.markdown` and so on) are shown laid out, with light and dark themes, highlighted code, and pictures you can click to enlarge. Markdown files on web sites are left alone until you turn that on (see "Web site access" below).
 - **Links open on the right**: a link in the document to another Markdown file, a `.txt` file or a code file type you added in Settings (such as `.py`) opens in the right half of the window, and your document stays on the left. Links clicked on the right keep opening on the right; ← → at the top go back and forward (so do the mouse side buttons). "Open here" opens the right-hand file in this tab (in place of the document on the left; the browser's Back button returns), and "Open in a new tab" opens it in a new tab. Links to other files (pictures, PDF and so on) and to other web sites open in a new tab and do not replace your document. Drag the divider to change the widths (remembered); double-click it to split evenly again. `Esc` closes the right side. Hold `Ctrl` while clicking to open a link the usual way. Can be turned off in Settings.
-- **CSV and Excel tables**: Chrome downloads `.csv` and `.xlsx` files instead of showing them. Links to CSV, TSV and Excel (`.xlsx`, `.xlsm`) files show a table on the right. "Open here", "Open in a new tab", the folder view and the Files tab open the AnyRead MD table page, with a Download button that saves the original file.
+- **CSV and Excel tables**: Chrome downloads `.csv` and `.xlsx` files instead of showing them. Links to CSV, TSV and Excel (`.xlsx`, `.xlsm`) files show a table on the right. "Open here", "Open in a new tab", the folder view and the Files tab open the AnyRead table page, with a Download button that saves the original file.
   - CSV: comma, semicolon and tab delimiters are detected. Files that are not UTF-8 (such as Big5 saved by Excel) are read in the usual encoding for the interface language.
   - Excel: one tab per sheet. Cell values are shown, with dates, times and percentages formatted as in Excel; other formatting (currency signs, colours, merged cells, charts) is not. Formulas show the result Excel saved with the file. The older `.xls` is not supported. Files are read inside the browser, with no outside service or library.
   - The table page shows up to 10,000 rows and the right side 1,000. A file that is too large is not read in full; a short message says so instead (20 MB on the right side, 100 MB on the table page; an `.xlsx` sheet that unpacks to more than 64 MB). Opening a `.csv` or `.xlsx` from the address bar is still a download; an extension cannot change that.
@@ -53,7 +53,7 @@ Everything is handled on your computer: **no account, no tracking, and no connec
 
 After installing, only local files are handled; the extension does not ask to "read all your data on all web sites". To read Markdown files on web sites, turn it on in one of two ways:
 
-- **One site**: open a Markdown file on that site, click the MD icon in the toolbar, and choose "Show this site with AnyRead MD".
+- **One site**: open a Markdown file on that site, click the AnyRead icon in the toolbar, and choose "Show this site with AnyRead".
 - **All sites**: in Settings, under "Web sites", turn on "Markdown files on all web sites".
 
 Either way Chrome asks you to confirm, and you can remove the access later in Settings.
@@ -106,7 +106,7 @@ The texts, permission notes and pictures for the store listing are in [store/lis
 
 ### Version numbers
 
-AnyRead MD has its own version numbers, starting at 1.0.0, following [Semantic Versioning](https://semver.org/) (major.minor.patch). It does not continue md-reader's 2.x numbers.
+AnyRead has its own version numbers, starting at 1.0.0, following [Semantic Versioning](https://semver.org/) (major.minor.patch). It does not continue md-reader's 2.x numbers.
 
 - Change the version only in `version` in `package.json`; `pnpm run build` (`build:manifest`) writes it into `version` in `src/manifest.json`.
 - The version shown in the extension is just `version` (such as `1.0.1`). The upstream version it is based on is recorded in `upstreamVersion` in `package.json`, for the record only; update it when merging a new upstream version. Credit to the original is in `LICENSE`, `THIRD_PARTY_NOTICES.txt`, the manifest's `author` and the README.

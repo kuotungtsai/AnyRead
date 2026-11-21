@@ -292,7 +292,7 @@ function syncScripts(exts?: unknown) {
         matchPatterns(sanitizeExts(exts), bases),
       )
     } catch (err) {
-      console.error('AnyRead MD: could not register content scripts', err)
+      console.error('AnyRead: could not register content scripts', err)
     }
   })
   return scriptsQueue

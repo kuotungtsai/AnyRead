@@ -1,6 +1,6 @@
 {
   "name": "anyread-md",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "upstreamVersion": "2.12.12",
   "author": "Bener (original md-reader), Gordon Tsai (AnyRead)",
   "license": "MIT",

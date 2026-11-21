@@ -1,6 +1,6 @@
 {
   "name": "__MSG_ext_name__",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "Gordon Tsai (based on md-reader by Bener, MIT)",
   "manifest_version": 3,
   "description": "__MSG_ext_desc__",
@@ -26,7 +26,7 @@
     "service_worker": "js/background.js"
   },
   "action": {
-    "default_title": "AnyRead MD",
+    "default_title": "AnyRead",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "images/icon-16.png",

@@ -10,17 +10,17 @@ import { getDefaultData, getDefaultMdConfig, type Data } from '@/core/data'
 import { mdRender, type MdOptions } from '@/core/markdown'
 import { createFileTree, inFolderFrame, isFileProtocol } from '@/core/files'
 import {
-  codeLanguage,
+  MAX_CODE_CHARS,
+  codeTypeOf,
   fileName,
   isDiagramName,
   isPlainTextName,
-  sanitizeExts,
+  prepareCode,
   textMatcher,
   toCodeFence,
-  urlExtension,
   viewableMatcher,
 } from '@/core/file-types'
-import { codeViewLanguage, renderCodeView } from '@/core/code-view'
+import { codeViewFor, renderCodeView } from '@/core/code-view'
 import { createEditor } from '@/core/editor'
 import { startTour, type TourStep } from '@/core/tour'
 import { safeCall, setRuntimeLanguage, onStale } from '@/core/runtime'
@@ -39,10 +39,12 @@ import sideIcon from '@/images/icon_side.svg'
 import goTopIcon from '@/images/icon_go_top.svg'
 import editIcon from '@/images/icon_edit.svg'
 import exportIcon from '@/images/icon_export.svg'
+import closeIcon from '@/images/icon_close.svg'
 import { createLinkPreview } from '@/core/preview'
 import { openTablePage } from '@/core/table-open'
-import { headingIndex, previewTarget, sameSite } from '@/core/links'
-import { isTableName } from '@/core/table'
+import { officeLabels } from '@/core/office-view'
+import { headingIndex, isSameFile, previewTarget, sameSite } from '@/core/links'
+import { isPageName } from '@/core/file-types'
 import { exportHtml, printPage } from '@/core/export'
 import { applyCustomCss, applyReading } from '@/core/reading'
 import { rememberPage } from '@/core/recent'
@@ -94,9 +96,6 @@ function main(data: Data) {
     actions[action]?.(value, oldValue)
   })
 
-  /* a file type the user added in the options page: show it as one
-     highlighted code block instead of parsing it as markdown */
-  const fileExt = urlExtension(location.href)
   /* a Mermaid file (.mmd): the whole file is one diagram */
   const diagram = isDiagramName(location.href)
   /* a .txt file: read as Markdown, every line break kept, and <...> shown
@@ -104,12 +103,12 @@ function main(data: Data) {
   const plainText = isPlainTextName(location.href)
   /* shown on the right of AnyRead MD's folder page */
   const embedded = inFolderFrame()
-  const codeLang =
-    !diagram && sanitizeExts(configData.codeExts).includes(fileExt)
-      ? codeLanguage(fileExt)
-      : null
+  /* data, settings and log files, dotfiles, and the user's code types */
+  const codeLang = !diagram
+    ? codeTypeOf(location.href, configData.codeExts)
+    : null
   /* VS Code colours (Shiki) when there is a grammar for it, else highlight.js */
-  const viewLang = codeLang ? codeViewLanguage(fileExt) : null
+  const viewLang = codeLang ? codeViewFor(location.href) : null
 
   if (
     !configData.enable ||
@@ -163,6 +162,9 @@ function main(data: Data) {
     (target: HTMLElement | Ele) =>
     (code: string = '', options?: MdOptions) => {
       const mdConfig = getDefaultMdConfig(configData.mdConfig)
+      // JSON pretty-printed; a very long file only in part, with a note
+      const prepared = codeLang ? prepareCode(code ?? '', location.href) : null
+      if (prepared) code = prepared.text
       if (viewLang) {
         target.innerHTML = renderCodeView(code ?? '', viewLang)
       } else {
@@ -177,6 +179,7 @@ function main(data: Data) {
         })
       }
       const ele = target instanceof Ele ? target.ele : target
+      if (prepared?.cut) ele.prepend(codeNote(prepared.cut, localize))
       document.title =
         (!codeLang &&
           !diagram &&
@@ -245,6 +248,7 @@ function main(data: Data) {
         truncated: localize('table_truncated'),
         empty: localize('table_empty'),
       },
+      office: officeLabels(localize),
     },
     isText: name => paneText(name),
     render(target, source, file) {
@@ -253,10 +257,16 @@ function main(data: Data) {
       // breaks, a code file as one highlighted block
       const isDiagram = isDiagramName(file)
       const isTxt = isPlainTextName(file)
+      let cut: number | undefined
       if (isDiagram) {
         source = toCodeFence(source, 'mermaid')
       } else if (!isTxt && paneText(file)) {
-        source = toCodeFence(source, codeLanguage(urlExtension(file)))
+        const prepared = prepareCode(source, file)
+        cut = prepared.cut
+        source = toCodeFence(
+          prepared.text,
+          codeTypeOf(file, configData.codeExts) || 'plaintext',
+        )
       }
       target.innerHTML = mdRender(source, {
         theme: toTheme(configData.pageTheme),
@@ -265,6 +275,7 @@ function main(data: Data) {
         pluginOptions: mdConfig.plugins,
       })
       applyReading(target, configData.reading)
+      if (cut) target.prepend(codeNote(cut, localize))
       globalEvent.emit('contentRendered', target)
     },
     onClick: target => globalEvent.emit('click', target),
@@ -321,6 +332,45 @@ function main(data: Data) {
           return
         }
       }
+      // any other local file (a picture, a PDF, a folder...): a tab of its
+      // own, so the document stays, as in the pane
+      if (
+        link &&
+        configData.linkPreview &&
+        e.button === 0 &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        !e.altKey &&
+        !href.startsWith('#') &&
+        (link as HTMLAnchorElement).protocol === 'file:' &&
+        !isSameFile(href, location.href)
+      ) {
+        e.preventDefault()
+        window.open((link as HTMLAnchorElement).href, '_blank', 'noopener')
+        return
+      }
+      // a link to another web site opens in a tab of its own, so the
+      // document stays (from a local file every web link is another site).
+      // In the folder page every web link does: one would take the frame,
+      // and most sites refuse to be shown in one.
+      const webLink =
+        link && /^https?:$/.test((link as HTMLAnchorElement).protocol)
+          ? (link as HTMLAnchorElement)
+          : null
+      if (
+        webLink &&
+        e.button === 0 &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        !e.altKey &&
+        (embedded || webLink.origin !== location.origin)
+      ) {
+        e.preventDefault()
+        window.open((link as HTMLAnchorElement).href, '_blank', 'noopener')
+        return
+      }
       globalEvent.emit('click', e.target)
     },
     true,
@@ -364,8 +414,10 @@ function main(data: Data) {
             up: localize('files_up'),
             empty: localize('files_empty'),
             error: localize('files_error'),
+            expand: localize('files_expand'),
           },
           viewableMatcher(configData.codeExts),
+          () => configData.dirShowHidden === true,
         )
       : null
   if (fileTree) {
@@ -598,15 +650,35 @@ function main(data: Data) {
   goTopBtn.hide()
   goTopBtn.on('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
 
+  /* in the folder page: close this file, back to the folder's file list */
+  const closeFile = () =>
+    window.parent.postMessage({ type: 'anyread:close' }, '*')
+  const closeFileBtn = embedded
+    ? new Ele<HTMLElement>(
+        'button',
+        {
+          className: [className.MD_BUTTON, className.CLOSE_FILE_BTN],
+          title: `${localize('editor_close')} (Esc)`,
+        },
+        svg(closeIcon),
+      )
+    : null
+  closeFileBtn?.on('click', closeFile)
+
   const buttonWrap = new Ele<HTMLElement>(
     'div',
-    { className: className.BUTTON_WRAP_ELE },
+    {
+      className: embedded
+        ? [className.BUTTON_WRAP_ELE, className.BUTTON_WRAP_CLOSABLE]
+        : className.BUTTON_WRAP_ELE,
+    },
     [
       sideExpandBtn,
       exportBtn,
       exportMenu,
       editToggleBtn,
       rawToggleBtn,
+      ...(closeFileBtn ? [closeFileBtn] : []),
       goTopBtn,
     ],
   )
@@ -631,12 +703,32 @@ function main(data: Data) {
       { type: 'anyread:shown', url: location.href.split('#')[0] },
       '*',
     )
-    // Esc pressed on the folder page (its tree focused) closes the pane here
+    // Esc closes what is on top: an image viewer, the export menu, the
+    // edit mode's text box or the split pane handle it themselves; with
+    // none of them, Esc closes this file and the folder's list comes back
+    const nothingOpen = () =>
+      !preview.isOpen &&
+      !editor.isEditing &&
+      !document.querySelector(`.${className.MODAL}`) &&
+      !document.body.classList.contains(className.SIDE_EXPANDED) &&
+      exportMenu.ele.style.display === 'none'
+    window.addEventListener(
+      'keydown',
+      e => {
+        if (e.key !== 'Escape' || e.defaultPrevented) return
+        const tag = (document.activeElement?.tagName || '').toLowerCase()
+        if (tag === 'input' || tag === 'textarea') return
+        // decided before the pane's own Esc handler closes it
+        if (nothingOpen()) closeFile()
+      },
+      true,
+    )
+    // Esc pressed on the folder page (its tree focused): the same here
     window.addEventListener('message', e => {
       if (e.source !== window.parent || e.data?.type !== 'anyread:esc') return
-      if (preview.isOpen && !document.querySelector(`.${className.MODAL}`)) {
-        preview.close()
-      }
+      if (document.querySelector(`.${className.MODAL}`)) return
+      if (preview.isOpen) preview.close()
+      else if (nothingOpen()) closeFile()
     })
   }
 
@@ -886,7 +978,7 @@ function isTextDocument(): boolean {
 function tableLink(link: HTMLAnchorElement): string | null {
   try {
     const url = new URL(link.href)
-    return isTableName(url.pathname) && sameSite(url, new URL(location.href))
+    return isPageName(url.pathname) && sameSite(url, new URL(location.href))
       ? url.href
       : null
   } catch {
@@ -910,4 +1002,17 @@ if (window.top !== window && !inFolderFrame()) {
       showPage()
       throw err
     })
+}
+
+/** "Large file: only the first 1 MB of 12 MB is shown." above cut code */
+function codeNote(size: number, localize: (key: string) => string) {
+  // characters, about bytes for a log or settings file
+  const mb = (n: number) =>
+    n >= 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.round(n / 1e3)} KB`
+  const note = document.createElement('p')
+  note.className = 'md-reader__code-note'
+  note.textContent = localize('code_truncated')
+    .replace('{shown}', mb(MAX_CODE_CHARS))
+    .replace('{size}', mb(size))
+  return note
 }

@@ -11,14 +11,63 @@ export const TABLE_EXTS = ['csv', 'tsv', 'xlsx', 'xlsm']
 export const WORKBOOK_EXTS = ['xlsx', 'xlsm']
 /** Mermaid diagram files, drawn as a diagram */
 export const DIAGRAM_EXTS = ['mmd', 'mermaid']
+/** Word and PowerPoint files, shown as their text (Chrome would download them) */
+export const OFFICE_EXTS = ['docx', 'pptx']
 /** plain text, shown like Markdown (line breaks kept) */
 export const TEXT_EXTS = ['txt']
+/** data, settings and log files, shown as code without adding them in Settings */
+export const CONFIG_EXTS = [
+  'json',
+  'jsonc',
+  'json5',
+  'jsonl',
+  'ndjson',
+  'geojson',
+  'yml',
+  'yaml',
+  'toml',
+  'ini',
+  'cfg',
+  'conf',
+  'properties',
+  'env',
+  'log',
+]
+/**
+ * Files known by their whole name (dotfiles, names without an extension),
+ * lower-cased, with the highlight.js language they are shown in. ".env.*"
+ * (.env.local ...) counts as .env.
+ */
+export const CONFIG_NAMES: Record<string, string> = {
+  '.gitignore': 'plaintext',
+  '.gitattributes': 'plaintext',
+  '.gitmodules': 'ini',
+  '.dockerignore': 'plaintext',
+  '.npmignore': 'plaintext',
+  '.prettierignore': 'plaintext',
+  '.eslintignore': 'plaintext',
+  '.editorconfig': 'ini',
+  '.npmrc': 'ini',
+  '.nvmrc': 'plaintext',
+  '.prettierrc': 'json',
+  '.eslintrc': 'json',
+  '.babelrc': 'json',
+  '.env': 'bash',
+  dockerfile: 'dockerfile',
+  makefile: 'makefile',
+  gnumakefile: 'makefile',
+  license: 'plaintext',
+  licence: 'plaintext',
+  codeowners: 'plaintext',
+}
 /** types AnyRead MD shows by itself; never registered again as code types */
 const BUILT_IN_EXTS = () => [
   ...MD_EXTS,
   ...DIAGRAM_EXTS,
   ...TEXT_EXTS,
   ...TABLE_EXTS,
+  ...OFFICE_EXTS,
+  ...CONFIG_EXTS,
 ]
 
 /** a plain extension: letters/digits, optionally with _ + - (e.g. c, h, cpp, c++, tsx) */
@@ -45,6 +94,14 @@ const LANG_ALIASES: Record<string, string> = {
   txt: 'plaintext',
   text: 'plaintext',
   log: 'plaintext',
+  jsonc: 'json',
+  json5: 'json',
+  jsonl: 'json',
+  ndjson: 'json',
+  geojson: 'json',
+  yml: 'yaml',
+  toml: 'ini',
+  env: 'bash',
   cfg: 'ini',
   conf: 'ini',
   mjs: 'javascript',
@@ -119,16 +176,50 @@ export const isTableName = (name: string) =>
 export const isWorkbookName = (name: string) =>
   WORKBOOK_EXTS.includes(urlExtension(name))
 
+export const isOfficeName = (name: string) =>
+  OFFICE_EXTS.includes(urlExtension(name))
+
+/** files shown on the extension's own page (the table page): tables, Word,
+ *  PowerPoint. Chrome would only download them. */
+export const isPageName = (name: string) =>
+  isTableName(name) || isOfficeName(name)
+
 export const isDiagramName = (name: string) =>
   DIAGRAM_EXTS.includes(urlExtension(name))
 
 export const isPlainTextName = (name: string) =>
   TEXT_EXTS.includes(urlExtension(name))
 
-/** plain text or code the pane shows as a code block: .txt + the user's code types */
+/** a file known by its whole name (.gitignore, Dockerfile...): its language */
+export function namedFileLanguage(url: string): string | null {
+  const name = fileName(url).toLowerCase()
+  if (Object.prototype.hasOwnProperty.call(CONFIG_NAMES, name))
+    return CONFIG_NAMES[name]
+  if (/^\.env\.[\w.-]+$/.test(name)) return 'bash' // .env.local ...
+  return null
+}
+
+/**
+ * The highlight.js language a file is shown in as code: the built-in data,
+ * settings and log types, files known by name, then the user's own types
+ * (Settings → Extra file types). null for anything else.
+ */
+export function codeTypeOf(
+  url: string,
+  codeExts: string[] = [],
+): string | null {
+  const named = namedFileLanguage(url)
+  if (named) return named
+  const ext = urlExtension(url)
+  if (CONFIG_EXTS.includes(ext) || sanitizeExts(codeExts).includes(ext)) {
+    return codeLanguage(ext)
+  }
+  return null
+}
+
+/** plain text or code the pane shows: .txt, the built-in code types, the user's */
 export function textMatcher(codeExts: string[] = []) {
-  const all = [...TEXT_EXTS, ...sanitizeExts(codeExts)]
-  return (name: string) => all.includes(urlExtension(name))
+  return (name: string) => isPlainTextName(name) || !!codeTypeOf(name, codeExts)
 }
 
 /** matcher for file names AnyRead MD opens: markdown, tables, the user's code types */
@@ -138,13 +229,52 @@ export function viewableMatcher(codeExts: string[] = []) {
     ...DIAGRAM_EXTS,
     ...TEXT_EXTS,
     ...TABLE_EXTS,
+    ...OFFICE_EXTS,
+    ...CONFIG_EXTS,
     ...sanitizeExts(codeExts),
   ]
-  return (name: string) => all.includes(urlExtension(name))
+  return (name: string) =>
+    all.includes(urlExtension(name)) || !!namedFileLanguage(name)
 }
 
 /** highlight.js language for a code extension (hljs aliases resolve the rest) */
 export const codeLanguage = (ext: string): string => LANG_ALIASES[ext] || ext
+
+/** most characters of a code file drawn (a long log stays responsive) */
+export const MAX_CODE_CHARS = 1_000_000
+
+/**
+ * A code file's text as it is shown: JSON pretty-printed (when it parses;
+ * .jsonc / .json5 keep their comments and layout), and only the first
+ * MAX_CODE_CHARS of a very long file. `cut` is the size of the whole text
+ * when it was cut.
+ */
+export function prepareCode(
+  text: string,
+  url: string,
+): { text: string; cut?: number } {
+  const ext = urlExtension(url)
+  if (
+    (ext === 'json' ||
+      ext === 'geojson' ||
+      namedFileLanguage(url) === 'json') &&
+    text.length <= MAX_CODE_CHARS
+  ) {
+    try {
+      text = JSON.stringify(JSON.parse(text), null, 2) + '\n'
+    } catch {
+      // not valid JSON: shown as written
+    }
+  }
+  if (text.length > MAX_CODE_CHARS) {
+    const end = text.lastIndexOf('\n', MAX_CODE_CHARS)
+    return {
+      text: text.slice(0, end > 0 ? end + 1 : MAX_CODE_CHARS),
+      cut: text.length,
+    }
+  }
+  return { text }
+}
 
 /** wrap raw text as one fenced block, with a fence longer than any ` run inside */
 export function toCodeFence(code: string, language: string): string {
@@ -198,4 +328,25 @@ export function originPattern(url: string): string | null {
   } catch {
     return null
   }
+}
+
+/**
+ * The folder above a file:// folder, or null at the top: a Windows drive
+ * (file:///C:/ — above it Chrome lists nothing), a network share
+ * (file://server/share/) or the root (file:///). On Linux and macOS a
+ * first-level folder such as file:///srv/ goes up to file:///.
+ */
+export function parentFolder(dir: string): string | null {
+  let url: URL
+  try {
+    url = new URL(dir)
+  } catch {
+    return null
+  }
+  const parts = url.pathname.split('/').filter(Boolean)
+  if (!parts.length) return null
+  if (parts.length === 1 && (url.host || /^[A-Za-z]:$/.test(parts[0]))) {
+    return null
+  }
+  return new URL('../', url.href.replace(/[?#].*$/, '')).href
 }

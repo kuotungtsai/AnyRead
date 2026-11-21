@@ -41,12 +41,14 @@ READ
 • Auto refresh: the page updates when you save the file in your editor
 • Links to other Markdown files open in a pane on the right, next to what you are reading; drag the divider to resize it, go back and forward, or open the file in this tab or a new one
 • CSV and Excel (.xlsx) files show as tables, in the pane or on a table page with a Download button (Chrome would only download them)
+• Word (.docx) and PowerPoint (.pptx) files show their text: headings, lists, tables and pictures, and each slide with its speaker notes
+• JSON (pretty-printed), YAML, TOML, INI, .env and log files, and .gitignore, Dockerfile, Makefile and similar, shown highlighted
 • .txt files, code files and Mermaid diagrams (.mmd) open in the pane too
 • Font size, text width, line height and your own CSS
 • Export to PDF (print) or to a single HTML file
 
 BROWSE A WHOLE FOLDER
-• Drag a folder into a normal tab to browse it: a file tree on the left, the file you pick on the right, the folder's README first
+• Drag a folder into a normal tab to browse it: its files in the main column, the folder above on the left; files open right there
 • Type to filter, ↑ ↓ to select, Enter to open
 • Search inside the files of the folder
 • "Files" tab in the side bar to switch between documents in the same folder
@@ -108,12 +110,14 @@ AnyRead MD 讓 Markdown 檔案在 Chrome 裡直接變成乾淨好讀的頁面，
 • 自動刷新：在編輯器存檔後，頁面自動更新
 • 連到其他 Markdown 檔的連結會在右半邊開啟，原本的文件留在左邊；可拖曳中間的分隔線調整寬度、回上一個 / 下一個，或改在這個分頁、新分頁開啟
 • CSV 和 Excel（.xlsx）檔顯示成表格，在右半邊或表格頁打開，表格頁有「下載」按鈕（Chrome 原本只會直接下載）
+• Word（.docx）和 PowerPoint（.pptx）檔顯示內容：標題、清單、表格、圖片，簡報每張投影片連同講者備註
+• JSON（自動排版）、YAML、TOML、INI、.env、log，以及 .gitignore、Dockerfile、Makefile 這類檔案，上色顯示
 • .txt、程式碼檔和 Mermaid 圖（.mmd）也能在右半邊打開
 • 可調整字體大小、內容寬度、行距，也能加自己的 CSS
 • 匯出成 PDF（列印）或單一 HTML 檔
 
 瀏覽整個資料夾
-• 把資料夾拖進一般分頁就能瀏覽：左邊檔案樹，右邊顯示點的檔案，有 README 會先顯示
+• 把資料夾拖進一般分頁就能瀏覽：右邊是資料夾的檔案，左邊是上一層；點的檔案直接在右邊顯示
 • 打字篩選、↑ ↓ 選擇、Enter 開啟
 • 可搜尋資料夾裡所有檔案的內容
 • 側邊欄「檔案」分頁，切換同資料夾的其他文件
@@ -176,7 +180,7 @@ Display Markdown files as formatted pages in the browser, and let the user brows
 - Host permission（`file:///*`）
 
   ```
-  Needed to detect and render local Markdown files the user opens, to read the browser's own file:// folder listing for the folder view and search, to read a linked Markdown, CSV, Excel, text or Mermaid file, or a picture next to the document (preview, table page and export), and to re-read the open file for auto refresh. The user must also turn on "Allow access to file URLs".
+  Needed to detect and render local Markdown files the user opens, to read the browser's own file:// folder listing for the folder view and search, to read a linked Markdown, CSV, Excel, Word, PowerPoint, text or Mermaid file, or a picture next to the document (preview, table page and export), and to re-read the open file for auto refresh. The user must also turn on "Allow access to file URLs".
   ```
 
 - Optional host permission（`*://*/*`，1.1.0 起改成選用）

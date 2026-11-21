@@ -1,4 +1,5 @@
 @import url('./variable.less');
+@import url('./office.less');
 @side-width: 260px;
 
 // Chrome paints a Markdown file as plain text before the reader has loaded.
@@ -466,11 +467,22 @@ body.md-reader {
     color: var(--color-primary);
     background: var(--color-primary-alpha-10);
     cursor: pointer;
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
   }
   .md-reader__files-title {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    // a link to this folder's folder page
+    color: inherit;
+    text-decoration: none;
+    &:hover {
+      color: var(--color-primary);
+      text-decoration: underline;
+    }
   }
   .md-reader__side .md-reader__files li a {
     display: flex;
@@ -491,6 +503,17 @@ body.md-reader {
     font-size: 0.85em;
     opacity: 0.6;
     text-align: center;
+  }
+  // a folder's ▸ opens it in the list; its name opens its folder page
+  .md-reader__files-dir > a > .md-reader__files-icon {
+    width: 1.6em;
+    padding: 0.15em 0;
+    border-radius: 3px;
+    cursor: pointer;
+    &:hover {
+      opacity: 1;
+      background: var(--color-primary-alpha-10);
+    }
   }
   .md-reader__files-file--active > a {
     font-weight: bolder;
@@ -988,4 +1011,46 @@ body.md-reader {
 .md-reader__btn--export {
   position: absolute;
   right: 96px;
+}
+
+/* ---------- a file in the folder page: Close (Esc) at the top right ---------- */
+.md-reader__btn--close-file {
+  position: absolute;
+  right: 16px;
+}
+body.md-reader .md-reader__button-wrap--closable {
+  .md-reader__btn--code-toggle {
+    right: 56px;
+  }
+  .md-reader__btn--edit-toggle {
+    right: 96px;
+  }
+  .md-reader__btn--export {
+    right: 136px;
+  }
+  .md-reader__export-menu {
+    right: 96px;
+  }
+}
+
+/* ---------- Word and PowerPoint files in the pane (office.less) ---------- */
+body.md-reader {
+  --office-line: var(--color-border);
+  --office-muted: var(--color-text-gray);
+}
+
+/* ---------- a long code or log file shown in part ---------- */
+.md-reader__code-note {
+  margin: 0 0 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--color-primary-alpha-10);
+  color: var(--color-text-gray);
+  font-size: 13px;
+}
+
+/* Chrome's own JSON viewer adds a "pretty-print" bar above the page: ours
+   pretty-prints already */
+body.md-reader > .json-formatter-container {
+  display: none !important;
 }

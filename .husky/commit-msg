@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# The same check for the commit message.
+node scripts/check-private.mjs --msg "$1" || exit 1
+
 # Optional local check kept outside version control (.git/company-guard.sh).
 guard="$(git rev-parse --git-common-dir)/company-guard.sh"
 if [ -f "$guard" ]; then sh "$guard" "$1" || exit 1; fi

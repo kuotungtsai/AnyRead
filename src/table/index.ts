@@ -19,6 +19,9 @@ import {
 } from '@/core/table'
 import { renderSheets, renderTable } from '@/core/table-view'
 import { readXlsx } from '@/core/xlsx'
+import { readOffice } from '@/core/office'
+import { officeLabels, renderOffice } from '@/core/office-view'
+import { isOfficeName, isPageName } from '@/core/file-types'
 import { inFolderFrame } from '@/core/files'
 import { toTheme } from '@/shared'
 
@@ -67,7 +70,7 @@ async function main() {
   } catch {
     url = null
   }
-  if (!url || !/^(file|https?):$/.test(url.protocol) || !isTableName(src)) {
+  if (!url || !/^(file|https?):$/.test(url.protocol) || !isPageName(src)) {
     content.textContent = t('preview_error')
     return
   }
@@ -92,7 +95,19 @@ async function main() {
     truncated: t('table_truncated'),
     empty: t('table_empty'),
   }
-  if (isWorkbookName(src)) {
+  if (isOfficeName(src)) {
+    document.body.classList.add('office')
+    try {
+      renderOffice(content, await readOffice(bytes, src), officeLabels(t))
+    } catch (e) {
+      content.textContent = t(
+        (e as Error)?.message === TOO_LARGE
+          ? 'table_too_large'
+          : 'office_unreadable',
+      )
+      return
+    }
+  } else if (isWorkbookName(src)) {
     try {
       renderSheets(content, await readXlsx(bytes), labels, 10000)
     } catch (e) {

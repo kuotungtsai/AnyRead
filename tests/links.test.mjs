@@ -90,3 +90,40 @@ test('CSV, Excel and text files open in the pane too', () => {
   )
   assert.equal(previewTarget('picture.png', page, isText), null)
 })
+
+test('every built-in file type opens in the split view; pictures and PDF do not', async () => {
+  // the same lists and the same matcher the page uses (main.ts: paneText)
+  const ft = await import('./.build/file-types.mjs')
+  const isText = ft.textMatcher([])
+  const base = 'file:///C:/docs/index.md'
+  const names = [
+    ...[
+      ...ft.MD_EXTS,
+      ...ft.TEXT_EXTS,
+      ...ft.TABLE_EXTS,
+      ...ft.OFFICE_EXTS,
+      ...ft.DIAGRAM_EXTS,
+      ...ft.CONFIG_EXTS,
+    ].map(ext => `sample.${ext}`),
+    // files known by their whole name, as people write them
+    ...Object.keys(ft.CONFIG_NAMES).map(n =>
+      n.startsWith('.')
+        ? n
+        : n === 'gnumakefile'
+        ? 'GNUmakefile'
+        : n[0].toUpperCase() + n.slice(1),
+    ),
+    '.env.local',
+    'LICENSE',
+  ]
+  const missing = names.filter(n => previewTarget(n, base, isText) === null)
+  assert.deepEqual(missing, [], 'these do not open in the split view')
+  // pictures and PDF open in a new tab instead, on purpose
+  for (const n of ['photo.png', 'scan.jpg', 'paper.pdf', 'archive.zip']) {
+    assert.equal(
+      previewTarget(n, base, isText),
+      null,
+      `${n} must not go to the split view`,
+    )
+  }
+})

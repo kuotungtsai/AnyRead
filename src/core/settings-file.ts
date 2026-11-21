@@ -23,6 +23,8 @@ export const SETTINGS_KEYS = [
   'sideTab',
   'dirView',
   'dirShowAll',
+  'dirShowHidden',
+  'dirSideHidden',
   'linkPreview',
   'previewWidth',
   'recentOn',
@@ -40,6 +42,8 @@ const BOOLEANS = [
   'refresh',
   'dirView',
   'dirShowAll',
+  'dirShowHidden',
+  'dirSideHidden',
   'linkPreview',
   'recentOn',
 ]

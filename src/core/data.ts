@@ -37,6 +37,8 @@ export interface Data {
   codeExts?: string[]
   /** folder view: "show all files" checkbox, remembered across reloads */
   dirShowAll?: boolean
+  /** folder view: list files whose names start with "." (also the Files tab) */
+  dirShowHidden?: boolean
   /** folder view: the left column hidden, remembered across reloads */
   dirSideHidden?: boolean
   /** first-run tutorial has been shown */

@@ -23,6 +23,7 @@ import ini from 'shiki/langs/ini.mjs'
 import powershell from 'shiki/langs/powershell.mjs'
 import bat from 'shiki/langs/bat.mjs'
 import asm from 'shiki/langs/asm.mjs'
+import { fileName, urlExtension } from './file-types'
 
 export const CODE_VIEW_CLASS = 'md-reader__code-view'
 
@@ -33,6 +34,11 @@ const EXT_LANG: Record<string, string> = {
   py: 'python',
   pyw: 'python',
   json: 'json',
+  jsonc: 'json',
+  json5: 'json',
+  jsonl: 'json',
+  ndjson: 'json',
+  geojson: 'json',
   yml: 'yaml',
   yaml: 'yaml',
   sh: 'shellscript',
@@ -44,6 +50,9 @@ const EXT_LANG: Record<string, string> = {
   ini: 'ini',
   cfg: 'ini',
   conf: 'ini',
+  toml: 'ini',
+  properties: 'ini',
+  env: 'shellscript',
   ps1: 'powershell',
   psm1: 'powershell',
   bat: 'bat',
@@ -76,6 +85,39 @@ function getHighlighter() {
     engine: createJavaScriptRegexEngine(),
   })
   return highlighter
+}
+
+/** files known by their whole name (lower-cased) → Shiki language */
+const NAME_LANG: Record<string, string> = {
+  '.gitignore': 'text',
+  '.gitattributes': 'text',
+  '.gitmodules': 'ini',
+  '.dockerignore': 'text',
+  '.npmignore': 'text',
+  '.prettierignore': 'text',
+  '.eslintignore': 'text',
+  '.editorconfig': 'ini',
+  '.npmrc': 'ini',
+  '.nvmrc': 'text',
+  '.prettierrc': 'json',
+  '.eslintrc': 'json',
+  '.babelrc': 'json',
+  '.env': 'shellscript',
+  makefile: 'make',
+  gnumakefile: 'make',
+  license: 'text',
+  licence: 'text',
+  codeowners: 'text',
+  // Dockerfile: no grammar bundled here, highlight.js draws it
+}
+
+/** Shiki language for a file (by its name, then its extension), or null */
+export function codeViewFor(url: string): string | null {
+  const name = fileName(url).toLowerCase()
+  if (Object.prototype.hasOwnProperty.call(NAME_LANG, name))
+    return NAME_LANG[name]
+  if (/^\.env\.[\w.-]+$/.test(name)) return 'shellscript'
+  return codeViewLanguage(urlExtension(url))
 }
 
 /** Shiki language for a file extension, or null when it has no grammar here */

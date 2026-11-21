@@ -10,17 +10,17 @@ import { getDefaultData, getDefaultMdConfig, type Data } from '@/core/data'
 import { mdRender, type MdOptions } from '@/core/markdown'
 import { createFileTree, inFolderFrame, isFileProtocol } from '@/core/files'
 import {
-  codeLanguage,
+  MAX_CODE_CHARS,
+  codeTypeOf,
   fileName,
   isDiagramName,
   isPlainTextName,
-  sanitizeExts,
+  prepareCode,
   textMatcher,
   toCodeFence,
-  urlExtension,
   viewableMatcher,
 } from '@/core/file-types'
-import { codeViewLanguage, renderCodeView } from '@/core/code-view'
+import { codeViewFor, renderCodeView } from '@/core/code-view'
 import { createEditor } from '@/core/editor'
 import { startTour, type TourStep } from '@/core/tour'
 import { safeCall, setRuntimeLanguage, onStale } from '@/core/runtime'
@@ -96,9 +96,6 @@ function main(data: Data) {
     actions[action]?.(value, oldValue)
   })
 
-  /* a file type the user added in the options page: show it as one
-     highlighted code block instead of parsing it as markdown */
-  const fileExt = urlExtension(location.href)
   /* a Mermaid file (.mmd): the whole file is one diagram */
   const diagram = isDiagramName(location.href)
   /* a .txt file: read as Markdown, every line break kept, and <...> shown
@@ -106,12 +103,12 @@ function main(data: Data) {
   const plainText = isPlainTextName(location.href)
   /* shown on the right of AnyRead MD's folder page */
   const embedded = inFolderFrame()
-  const codeLang =
-    !diagram && sanitizeExts(configData.codeExts).includes(fileExt)
-      ? codeLanguage(fileExt)
-      : null
+  /* data, settings and log files, dotfiles, and the user's code types */
+  const codeLang = !diagram
+    ? codeTypeOf(location.href, configData.codeExts)
+    : null
   /* VS Code colours (Shiki) when there is a grammar for it, else highlight.js */
-  const viewLang = codeLang ? codeViewLanguage(fileExt) : null
+  const viewLang = codeLang ? codeViewFor(location.href) : null
 
   if (
     !configData.enable ||
@@ -165,6 +162,9 @@ function main(data: Data) {
     (target: HTMLElement | Ele) =>
     (code: string = '', options?: MdOptions) => {
       const mdConfig = getDefaultMdConfig(configData.mdConfig)
+      // JSON pretty-printed; a very long file only in part, with a note
+      const prepared = codeLang ? prepareCode(code ?? '', location.href) : null
+      if (prepared) code = prepared.text
       if (viewLang) {
         target.innerHTML = renderCodeView(code ?? '', viewLang)
       } else {
@@ -179,6 +179,7 @@ function main(data: Data) {
         })
       }
       const ele = target instanceof Ele ? target.ele : target
+      if (prepared?.cut) ele.prepend(codeNote(prepared.cut, localize))
       document.title =
         (!codeLang &&
           !diagram &&
@@ -256,10 +257,16 @@ function main(data: Data) {
       // breaks, a code file as one highlighted block
       const isDiagram = isDiagramName(file)
       const isTxt = isPlainTextName(file)
+      let cut: number | undefined
       if (isDiagram) {
         source = toCodeFence(source, 'mermaid')
       } else if (!isTxt && paneText(file)) {
-        source = toCodeFence(source, codeLanguage(urlExtension(file)))
+        const prepared = prepareCode(source, file)
+        cut = prepared.cut
+        source = toCodeFence(
+          prepared.text,
+          codeTypeOf(file, configData.codeExts) || 'plaintext',
+        )
       }
       target.innerHTML = mdRender(source, {
         theme: toTheme(configData.pageTheme),
@@ -268,6 +275,7 @@ function main(data: Data) {
         pluginOptions: mdConfig.plugins,
       })
       applyReading(target, configData.reading)
+      if (cut) target.prepend(codeNote(cut, localize))
       globalEvent.emit('contentRendered', target)
     },
     onClick: target => globalEvent.emit('click', target),
@@ -409,6 +417,7 @@ function main(data: Data) {
             expand: localize('files_expand'),
           },
           viewableMatcher(configData.codeExts),
+          () => configData.dirShowHidden === true,
         )
       : null
   if (fileTree) {
@@ -993,4 +1002,17 @@ if (window.top !== window && !inFolderFrame()) {
       showPage()
       throw err
     })
+}
+
+/** "Large file: only the first 1 MB of 12 MB is shown." above cut code */
+function codeNote(size: number, localize: (key: string) => string) {
+  // characters, about bytes for a log or settings file
+  const mb = (n: number) =>
+    n >= 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.round(n / 1e3)} KB`
+  const note = document.createElement('p')
+  note.className = 'md-reader__code-note'
+  note.textContent = localize('code_truncated')
+    .replace('{shown}', mb(MAX_CODE_CHARS))
+    .replace('{size}', mb(size))
+  return note
 }

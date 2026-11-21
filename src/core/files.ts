@@ -64,10 +64,11 @@ const dirName = (dir: string) =>
 function sortEntries(
   entries: DirEntry[],
   isViewable: (name: string) => boolean,
+  showHidden: boolean,
 ): DirEntry[] {
   return entries
     .filter(e => e.isDir || isViewable(e.name))
-    .filter(e => !e.name.startsWith('.'))
+    .filter(e => showHidden || !e.name.startsWith('.'))
     .sort((a, b) =>
       a.isDir !== b.isDir
         ? a.isDir
@@ -95,6 +96,8 @@ export function createFileTree(
   },
   /** files listed in the tree: markdown by default */
   isViewable: (name: string) => boolean = name => MD_EXT_RE.test(name),
+  /** list files and folders whose names start with "." (folder page option) */
+  showHidden: () => boolean = () => false,
 ) {
   const currentFile = stripUrl(location.href)
   let rootDir = dirOf(currentFile)
@@ -136,7 +139,7 @@ export function createFileTree(
     entries: DirEntry[],
     depth: number,
   ) {
-    const items = sortEntries(entries, isViewable)
+    const items = sortEntries(entries, isViewable, showHidden())
     if (!items.length) {
       const li = new Ele<HTMLElement>('li', {
         className: className.FILES_EMPTY,

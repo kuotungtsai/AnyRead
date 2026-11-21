@@ -50,26 +50,28 @@ the clicks are not. The specs keep real clicks on purpose.
 
 ## The specs
 
-| Spec        | What it checks                                                                 |
-| ----------- | ------------------------------------------------------------------------------ |
-| `pane`      | linked Markdown opens in the pane; back / forward; new tab                     |
-| `openhere`  | the pane's "Open here" and the browser's Back                                  |
-| `anchors`   | `#heading` links written for GitHub; file names not turned into links          |
-| `esc`       | Esc closes the pane, also from the folder page's tree                          |
-| `csv`       | CSV / TSV / Excel in the pane and on the table page; encodings; Download       |
-| `review`    | other pages' frames left alone; size limits; the folder page's live theme      |
-| `settings`  | saving and restoring the settings file                                         |
-| `folder`    | the folder page: files, `.txt`, tables, diagrams, sub folders, Close           |
-| `filesup`   | the side bar's Files tab: ↑ stops at the drive (or /) with files listed        |
-| `filesdir`  | the Files tab: a folder's name opens its folder page, ▸ opens it in place      |
-| `cols`      | the two columns: down, up, ▸, breadcrumb, Back; the drive root (Windows only)  |
-| `hist`      | Back / Forward through the folder page, a late page after a quick Back         |
-| `closemd`   | Close (Esc) for a file in the folder page; Esc with the pane or edit mode open |
-| `sidehide`  | web links open a new tab; hiding the left column                               |
-| `flash`     | no flash of Chrome's own listing on reload                                     |
-| `office`    | Word and PowerPoint in the pane, the table page and the folder page            |
-| `mainlinks` | links to other local files open a new tab and keep the document                |
-| `math`      | `$`, `$$`, ` ```math ` and `` $`…`$ `` formulas; code with `$` left alone      |
+| Spec        | What it checks                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| `pane`      | linked Markdown opens in the pane; back / forward; new tab                                     |
+| `paneall`   | every kind of file a document can link to opens in the split view; pictures / PDF in a new tab |
+| `openhere`  | the pane's "Open here" and the browser's Back                                                  |
+| `anchors`   | `#heading` links written for GitHub; file names not turned into links                          |
+| `esc`       | Esc closes the pane, also from the folder page's tree                                          |
+| `csv`       | CSV / TSV / Excel in the pane and on the table page; encodings; Download                       |
+| `review`    | other pages' frames left alone; size limits; the folder page's live theme                      |
+| `settings`  | saving and restoring the settings file                                                         |
+| `folder`    | the folder page: files, `.txt`, tables, diagrams, sub folders, Close                           |
+| `filesup`   | the side bar's Files tab: ↑ stops at the drive (or /) with files listed                        |
+| `filesdir`  | the Files tab: a folder's name opens its folder page, ▸ opens it in place                      |
+| `cols`      | the two columns: down, up, ▸, breadcrumb, Back; the drive root (Windows only)                  |
+| `hist`      | Back / Forward through the folder page, a late page after a quick Back                         |
+| `closemd`   | Close (Esc) for a file in the folder page; Esc with the pane or edit mode open                 |
+| `sidehide`  | web links open a new tab; hiding the left column                                               |
+| `flash`     | no flash of Chrome's own listing on reload                                                     |
+| `office`    | Word and PowerPoint in the pane, the table page and the folder page                            |
+| `mainlinks` | links to other local files open a new tab and keep the document                                |
+| `math`      | `$`, `$$`, ` ```math ` and `` $`…`$ `` formulas; code with `$` left alone                      |
+| `config`    | JSON (pretty-printed), YAML, TOML, .env, dotfiles, Dockerfile, a large log; hidden files       |
 
 ## Writing a spec
 

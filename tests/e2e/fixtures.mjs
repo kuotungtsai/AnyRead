@@ -498,6 +498,100 @@ export function makeFixtures(root) {
     '# Links\n\n[picture](pic.png) [pdf](doc.pdf) [folder](sub/) [other md](sub/s.md) [here](#links)\n\nAn outside site (a closed local port: nothing leaves the machine): [site](http://127.0.0.1:9/site)\n',
   )
 
+  // configtest: data and settings files, dotfiles, files without an
+  // extension, a large log and a hidden folder (all invented)
+  put(
+    'configtest/data.json',
+    '{"name":"demo","items":[1,2,3],"nested":{"ok":true,"label":"x"}}\n',
+  )
+  put('configtest/broken.json', '{"a": 1,\n')
+  put(
+    'configtest/settings.jsonc',
+    '{\n  // a comment\n  "editor.fontSize": 14\n}\n',
+  )
+  put('configtest/app.yml', 'name: demo\nitems:\n  - one\n  - two\n')
+  put(
+    'configtest/pyproject.toml',
+    '[project]\nname = "demo"\nversion = "1.0"\n',
+  )
+  put('configtest/app.ini', '[main]\nmode = test\n')
+  put('configtest/.env', 'API_URL=http://127.0.0.1:9\nDEBUG=true\n')
+  put('configtest/.gitignore', 'node_modules/\ndist/\n')
+  put('configtest/Dockerfile', 'FROM node:22\nRUN echo hi\n')
+  put('configtest/Makefile', 'all:\n\techo hi\n')
+  put('configtest/LICENSE', 'MIT License\n\nPermission is hereby granted.\n')
+  put(
+    'configtest/big.log',
+    Array.from(
+      { length: 30000 },
+      (_, i) =>
+        `2026-01-01 00:00:${String(i % 60).padStart(
+          2,
+          '0',
+        )} INFO line ${i} of a long log file\n`,
+    ).join(''),
+  )
+  put('configtest/.hidden/inside.md', '# Inside a hidden folder\n')
+  put(
+    'configtest/index.md',
+    '# Config files\n\n- [data](data.json)\n- [yaml](app.yml)\n- [ignore](.gitignore)\n- [docker](Dockerfile)\n',
+  )
+
+  // paneall: one file of each kind, each with a marker the split view must
+  // show (pictures and PDF open in a new tab instead)
+  const kinds = [
+    ['a.md', '# MARK-md\n'],
+    ['a.txt', 'MARK-txt\n'],
+    ['a.csv', 'col\nMARK-csv\n'],
+    ['a.tsv', 'col\nMARK-tsv\n'],
+    ['a.mmd', 'graph TD\n  A[MARK-mmd] --> B\n'],
+    ['a.json', '{"k":"MARK-json"}\n'],
+    ['a.jsonc', '{ // c\n "k": "MARK-jsonc" }\n'],
+    ['a.json5', "{ k: 'MARK-json5' }\n"],
+    ['a.jsonl', '{"k":"MARK-jsonl"}\n{"k":2}\n'],
+    ['a.ndjson', '{"k":"MARK-ndjson"}\n'],
+    ['a.geojson', '{"type":"Point","name":"MARK-geojson"}\n'],
+    ['a.yml', 'k: MARK-yml\n'],
+    ['a.yaml', 'k: MARK-yaml\n'],
+    ['a.toml', 'k = "MARK-toml"\n'],
+    ['a.ini', '[s]\nk = MARK-ini\n'],
+    ['a.cfg', '[s]\nk = MARK-cfg\n'],
+    ['a.conf', 'k MARK-conf\n'],
+    ['a.properties', 'k=MARK-properties\n'],
+    ['a.env', 'K=MARK-env\n'],
+    ['a.log', 'INFO MARK-log\n'],
+    ['.gitignore', 'MARK-gitignore/\n'],
+    ['.editorconfig', '[*]\nMARK-editorconfig = 1\n'],
+    ['.npmrc', 'MARK-npmrc=1\n'],
+    ['.env.local', 'K=MARK-envlocal\n'],
+    ['Dockerfile', 'FROM MARK-dockerfile\n'],
+    ['Makefile', 'MARK-makefile:\n\techo hi\n'],
+    ['LICENSE', 'MARK-license\n'],
+  ]
+  for (const [name, text] of kinds) put(`paneall/${name}`, text)
+  put(
+    'paneall/a.xlsx',
+    workbook([{ name: 'S', rows: [['col'], ['MARK-xlsx']] }]),
+  )
+  put('paneall/a.docx', reportDocx())
+  put('paneall/a.pptx', deckPptx())
+  put('paneall/pic.png', PNG)
+  put('paneall/doc.pdf', '%PDF-1.4\n%EOF\n')
+  const all = [
+    ...kinds.map(([n]) => n),
+    'a.xlsx',
+    'a.docx',
+    'a.pptx',
+    'pic.png',
+    'doc.pdf',
+  ]
+  put(
+    'paneall/index.md',
+    '# Every kind\n\n' +
+      all.map(n => `- [${n}](${encodeURI(n)})`).join('\n') +
+      '\n',
+  )
+
   // mathtest: every way GitHub writes math, and code that only looks like it
   put(
     'mathtest/math.md',

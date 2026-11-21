@@ -89,3 +89,78 @@ test('parentFolder: up one folder, stopping at a drive, a share or the root', as
   assert.equal(parentFolder('file:///C:/a%20b/c/'), 'file:///C:/a%20b/')
   assert.equal(parentFolder('not a url'), null)
 })
+
+test("codeTypeOf: built-in data / settings types, named files, the user's types", async () => {
+  const { codeTypeOf } = await import('./.build/file-types.mjs')
+  assert.equal(codeTypeOf('file:///C:/a/data.json'), 'json')
+  assert.equal(codeTypeOf('file:///C:/a/x.JSONC'), 'json')
+  assert.equal(codeTypeOf('file:///C:/a/app.yml'), 'yaml')
+  assert.equal(codeTypeOf('file:///C:/a/pyproject.toml'), 'ini')
+  assert.equal(codeTypeOf('file:///C:/a/run.log'), 'plaintext')
+  assert.equal(codeTypeOf('file:///C:/a/.gitignore'), 'plaintext')
+  assert.equal(codeTypeOf('file:///C:/a/.env'), 'bash')
+  assert.equal(codeTypeOf('file:///C:/a/.env.local'), 'bash')
+  assert.equal(codeTypeOf('file:///C:/a/Dockerfile'), 'dockerfile')
+  assert.equal(codeTypeOf('file:///C:/a/Makefile'), 'makefile')
+  assert.equal(codeTypeOf('file:///C:/a/LICENSE'), 'plaintext')
+  assert.equal(
+    codeTypeOf('file:///C:/a/main.py'),
+    null,
+    'not added by the user',
+  )
+  assert.equal(
+    codeTypeOf('file:///C:/a/main.py', ['py']),
+    'py',
+    'highlight.js name for Python',
+  )
+  assert.equal(codeTypeOf('file:///C:/a/notes.md'), null)
+  assert.equal(codeTypeOf('file:///C:/a/README'), null)
+})
+
+test('prepareCode: JSON pretty-printed when valid; long files cut on a line', async () => {
+  const { prepareCode, MAX_CODE_CHARS } = await import(
+    './.build/file-types.mjs'
+  )
+  assert.equal(
+    prepareCode('{"a":[1,2]}', 'x.json').text,
+    '{\n  "a": [\n    1,\n    2\n  ]\n}\n',
+  )
+  assert.equal(
+    prepareCode('{"a": 1,', 'x.json').text,
+    '{"a": 1,',
+    'invalid: as written',
+  )
+  assert.equal(
+    prepareCode('{\n // c\n "a": 1 }', 'x.jsonc').text,
+    '{\n // c\n "a": 1 }',
+    'jsonc kept',
+  )
+  const line = 'x'.repeat(99) + '\n'
+  const big = line.repeat(Math.ceil((MAX_CODE_CHARS + 500) / 100))
+  const r = prepareCode(big, 'run.log')
+  assert.equal(r.cut, big.length)
+  assert.ok(r.text.length <= MAX_CODE_CHARS && r.text.endsWith('\n'))
+  assert.equal(prepareCode('short\n', 'run.log').cut, undefined)
+})
+
+test('the manifest opens every built-in data / settings type and named file', async () => {
+  const fs = await import('node:fs')
+  const { CONFIG_EXTS, CONFIG_NAMES } = await import('./.build/file-types.mjs')
+  const manifest = JSON.parse(
+    fs.readFileSync(new URL('../src/manifest.json', import.meta.url), 'utf8'),
+  )
+  const matches = manifest.content_scripts[0].matches
+  for (const ext of CONFIG_EXTS) {
+    assert.ok(matches.includes(`file://*/*.${ext}`), `missing *.${ext}`)
+    assert.ok(
+      matches.includes(`file://*/*.${ext.toUpperCase()}`),
+      `missing *.${ext.toUpperCase()}`,
+    )
+  }
+  for (const name of Object.keys(CONFIG_NAMES)) {
+    assert.ok(
+      matches.some(m => m.toLowerCase() === `file://*/*/${name}`),
+      `missing ${name}`,
+    )
+  }
+})

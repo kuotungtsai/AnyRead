@@ -204,6 +204,9 @@ async function topMode() {
   whenListed(() => {
     const here = location.href.split('#')[0]
     let showAll = data?.dirShowAll === true
+    // files and folders whose names start with "." (.gitignore, .env ...)
+    let showHidden = data?.dirShowHidden === true
+    const listed = (e: DirEntry) => showHidden || !e.name.startsWith('.')
     let selected = 0
 
     const style = el('style')
@@ -277,7 +280,11 @@ async function topMode() {
     const allBox = el('input', { type: 'checkbox' })
     allBox.checked = showAll
     allLabel.append(allBox, ' ' + t('dir_show_all'))
-    bar.append(filter, allLabel)
+    const hiddenLabel = el('label')
+    const hiddenBox = el('input', { type: 'checkbox', 'data-opt': 'hidden' })
+    hiddenBox.checked = showHidden
+    hiddenLabel.append(hiddenBox, ' ' + t('dir_show_hidden'))
+    bar.append(filter, allLabel, hiddenLabel)
 
     const inText = el('label')
     const inTextBox = el('input', { type: 'checkbox' })
@@ -301,7 +308,7 @@ async function topMode() {
         const walk = async (items: DirEntry[], depth: number) => {
           for (const e of items) {
             if (found.length >= MAX_FILES) return
-            if (e.name.startsWith('.')) continue
+            if (!listed(e)) continue
             if (!e.isDir) {
               if (isMarkdownName(e.name)) found.push(e)
             } else if (depth < MAX_DEPTH && e.name !== 'node_modules') {
@@ -397,7 +404,7 @@ async function topMode() {
     function visible(): DirEntry[] {
       const q = filter.value.trim().toLowerCase()
       const items = curEntries.filter(
-        e => (showAll || kind(e) < 3) && !e.name.startsWith('.'),
+        e => (showAll || kind(e) < 3) && listed(e),
       )
       return items
         .filter(e => !q || e.name.toLowerCase().includes(q))
@@ -727,7 +734,7 @@ async function topMode() {
 
     function treeEntries(items: DirEntry[]) {
       return items
-        .filter(e => !e.name.startsWith('.') && (showAll || kind(e) < 3))
+        .filter(e => listed(e) && (showAll || kind(e) < 3))
         .sort(
           (a, b) =>
             Number(b.isDir) - Number(a.isDir) ||
@@ -837,6 +844,16 @@ async function topMode() {
       })
     }
     allBox.addEventListener('change', () => {
+      const d = leftDir
+      leftDir = ''
+      showLeft(d)
+    })
+    hiddenBox.addEventListener('change', () => {
+      showHidden = hiddenBox.checked
+      storage.set('dirShowHidden', showHidden)
+      files = null // search inside files again, with or without them
+      render()
+      queueSearch()
       const d = leftDir
       leftDir = ''
       showLeft(d)

@@ -118,6 +118,6 @@ test('not a settings file', () => {
 test('file name', () => {
   assert.equal(
     settingsFileName(new Date(2026, 10, 8)),
-    'anyread-md-settings-2026-11-08.json',
+    'anyread-settings-2026-11-08.json',
   )
 })

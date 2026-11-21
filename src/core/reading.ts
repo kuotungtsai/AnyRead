@@ -1,7 +1,7 @@
 /** Reading layout and the user's own CSS (options page). */
 import type { Reading } from './reading-config'
 
-const CUSTOM_CSS_ID = 'anyread-md-custom-css'
+const CUSTOM_CSS_ID = 'anyread-custom-css'
 export const LINE_HEIGHT_CLASS = 'md-reader__reading-line-height'
 
 /** 0 means "keep the theme's value" */

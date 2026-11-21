@@ -62,7 +62,7 @@ Either way Chrome asks you to confirm, and you can remove the access later in Se
 
 ### From the zip file
 
-1. Unpack `anyread-md-<version>.zip` to a place it can stay, such as `D:\tools\anyread-md` (do not delete or move it afterwards).
+1. Unpack `anyread-<version>.zip` to a place it can stay, such as `D:\tools\anyread` (do not delete or move it afterwards).
 2. Go to `chrome://extensions` and turn on "Developer mode" at the top right.
 3. Click "Load unpacked" and choose the unpacked folder, the one with `manifest.json` in it.
 4. A welcome page opens after installing. Follow it to turn on "**Allow access to file URLs**"; local `.md` files are shown laid out only after that.
@@ -93,10 +93,10 @@ npx pnpm@9 test:e2e
 # Write the demo (a made-up team handbook, one example of every feature) into demo/, or another folder
 npx pnpm@9 demo
 
-# Build and pack the zip to share: dist/anyread-md-<version>.zip
+# Build and pack the zip to share: dist/anyread-<version>.zip
 npx pnpm@9 run pack:share
 
-# Build and pack the zip for the Chrome Web Store: dist/anyread-md-<version>-store.zip
+# Build and pack the zip for the Chrome Web Store: dist/anyread-<version>-store.zip
 npx pnpm@9 run pack:store
 ```
 
@@ -112,7 +112,7 @@ AnyRead has its own version numbers, starting at 1.0.0, following [Semantic Vers
 - The version shown in the extension is just `version` (such as `1.0.1`). The upstream version it is based on is recorded in `upstreamVersion` in `package.json`, for the record only; update it when merging a new upstream version. Credit to the original is in `LICENSE`, `THIRD_PARTY_NOTICES.txt`, the manifest's `author` and the README.
 - For reference: 1.0.0 = md-reader 2.12.12 + the folder tree, edit mode, plugin settings, the folder view, and upgraded dependencies (mermaid 11, markdown-it 15, KaTeX 0.18, Svelte 5). The 2.13.0 before it is the same code with a different version number.
 
-Before a new release, raise `version` in `package.json` so versions can be told apart. `pnpm run build` updates the manifest's version, builds, and packs `dist/anyread-md-<version>.zip` (the same zip as `pack:share`). `pack:share` alone does not update the manifest, so run `pnpm run build` (or `pnpm run build:manifest`) once first, or the zip file name keeps the old version.
+Before a new release, raise `version` in `package.json` so versions can be told apart. `pnpm run build` updates the manifest's version, builds, and packs `dist/anyread-<version>.zip` (the same zip as `pack:share`). `pack:share` alone does not update the manifest, so run `pnpm run build` (or `pnpm run build:manifest`) once first, or the zip file name keeps the old version.
 
 ### Releasing
 

@@ -62,7 +62,7 @@
 
 ### 用打包好的 zip
 
-1. 把 `anyread-md-<版本>.zip` 解壓縮到固定位置，例如 `D:\tools\anyread-md`（之後不要刪除或搬動）。
+1. 把 `anyread-<版本>.zip` 解壓縮到固定位置，例如 `D:\tools\anyread`（之後不要刪除或搬動）。
 2. 到 `chrome://extensions`，打開右上角「開發人員模式」。
 3. 按「載入未封裝項目」，選解壓縮出來、裡面有 `manifest.json` 的資料夾。
 4. 安裝後會自動開啟歡迎頁，照著開啟「**允許存取檔案網址**」，本機的 `.md` 才會被渲染。
@@ -93,10 +93,10 @@ npx pnpm@9 test:e2e
 # 產生 demo 資料夾（虛構的團隊手冊，每個功能一個例子）到 demo/，或指定位置
 npx pnpm@9 demo
 
-# 建置並打包成要分享的 zip：dist/anyread-md-<版本>.zip
+# 建置並打包成要分享的 zip：dist/anyread-<版本>.zip
 npx pnpm@9 run pack:share
 
-# 建置並打包成上架 Chrome 商店用的 zip：dist/anyread-md-<版本>-store.zip
+# 建置並打包成上架 Chrome 商店用的 zip：dist/anyread-<版本>-store.zip
 npx pnpm@9 run pack:store
 ```
 
@@ -112,7 +112,7 @@ AnyRead 有自己的版本號，從 1.0.0 起算，採 [語意化版本](https:/
 - 擴充裡顯示的版本就是單純的 `version`（例如 `1.0.1`）。參考的上游版本記在 `package.json` 的 `upstreamVersion`，只做紀錄，合併新的上游版本時記得一起更新。來源標示放在 `LICENSE`、`THIRD_PARTY_NOTICES.txt`、manifest 的 `author` 和 README。
 - 對照：1.0.0 = md-reader 2.12.12 + 資料夾樹、編輯模式、插件設定、資料夾檢視，以及相依套件升級（mermaid 11、markdown-it 15、KaTeX 0.18、Svelte 5）。在這之前的 2.13.0 就是同一份程式，只是改了版號。
 
-出新版前，記得把 `package.json` 的 `version` 往上加，才分得出是哪一版。`pnpm run build` 會依序更新 manifest 的版本號、建置，並打包成 `dist/anyread-md-<版本>.zip`（跟 `pack:share` 的 zip 相同）。只跑 `pack:share` 不會更新 manifest，要先跑一次 `pnpm run build`（或 `pnpm run build:manifest`），zip 檔名才會是新版號。
+出新版前，記得把 `package.json` 的 `version` 往上加，才分得出是哪一版。`pnpm run build` 會依序更新 manifest 的版本號、建置，並打包成 `dist/anyread-<版本>.zip`（跟 `pack:share` 的 zip 相同）。只跑 `pack:share` 不會更新 manifest，要先跑一次 `pnpm run build`（或 `pnpm run build:manifest`），zip 檔名才會是新版號。
 
 ### 發布
 

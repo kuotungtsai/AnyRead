@@ -1,5 +1,5 @@
 // Package the built extension for upload to the Chrome Web Store.
-// Output: dist/anyread-md-<version>-store.zip with manifest.json at the
+// Output: dist/anyread-<version>-store.zip with manifest.json at the
 // zip root (the store rejects a zip whose manifest is inside a folder).
 // Run after building: node scripts/pack-store.mjs
 import fs from 'fs'
@@ -28,7 +28,7 @@ for (const required of [
 }
 
 fs.mkdirSync(distDir, { recursive: true })
-const outFile = new URL(`anyread-md-${manifest.version}-store.zip`, distDir)
+const outFile = new URL(`anyread-${manifest.version}-store.zip`, distDir)
 const output = fs.createWriteStream(outFile)
 const archive = archiver('zip', { zlib: { level: 9 } })
 // an empty zip means the files were not found: fail loudly

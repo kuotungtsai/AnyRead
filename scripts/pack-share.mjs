@@ -1,6 +1,6 @@
 // Package the built extension as a zip for sharing.
-// Output: dist/anyread-md-<version>.zip
-//   anyread-md/            <- "Load unpacked" this folder
+// Output: dist/anyread-<version>.zip
+//   anyread/               <- "Load unpacked" this folder
 //     manifest.json, js/, ... (built extension, includes LICENSE and
 //     THIRD_PARTY_NOTICES.txt)
 //     安裝說明.txt
@@ -30,7 +30,7 @@ for (const required of [
 }
 
 fs.mkdirSync(distDir, { recursive: true })
-const outFile = new URL(`anyread-md-${manifest.version}.zip`, distDir)
+const outFile = new URL(`anyread-${manifest.version}.zip`, distDir)
 const output = fs.createWriteStream(outFile)
 const archive = archiver('zip', { zlib: { level: 9 } })
 
@@ -55,8 +55,8 @@ archive.on('error', err => {
 })
 
 archive.pipe(output)
-archive.directory(fileURLToPath(extDir), 'anyread-md')
+archive.directory(fileURLToPath(extDir), 'anyread')
 archive.file(fileURLToPath(guide), {
-  name: 'anyread-md/安裝說明.txt',
+  name: 'anyread/安裝說明.txt',
 })
 await archive.finalize()

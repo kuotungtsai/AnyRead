@@ -65,7 +65,7 @@ with a new "Last updated" date.
 
 ## Contact
 
-Questions: open an issue at <https://github.com/kuotungtsai/AnyRead-MD/issues>.
+Questions: open an issue at <https://github.com/kuotungtsai/AnyRead/issues>.
 
 ---
 
@@ -98,4 +98,4 @@ AnyRead 是用來瀏覽本機資料夾、顯示裡面的檔案和編輯 Markdown
 - **文件裡的外部圖片**：如果文件引用了網路上的圖片，瀏覽器會像開一般網頁一樣去載入
   那張圖片；擴充本身不會額外發出任何連線。
 
-有問題請到 <https://github.com/kuotungtsai/AnyRead-MD/issues> 回報。
+有問題請到 <https://github.com/kuotungtsai/AnyRead/issues> 回報。

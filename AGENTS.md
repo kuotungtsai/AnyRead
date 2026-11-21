@@ -13,7 +13,7 @@ npx pnpm@9 build:extension             # build into extension/
 npx pnpm@9 test                        # unit tests (Node, no browser)
 npx pnpm@9 test:e2e                    # browser tests (needs the build above)
 npx pnpm@9 test:e2e folder office      # only some browser tests
-npx pnpm@9 run build                   # version into the manifest, build, dist/anyread-md-<version>.zip
+npx pnpm@9 run build                   # version into the manifest, build, dist/anyread-<version>.zip
 npx pnpm@9 demo                        # a made-up handbook with every feature, into demo/ (to try by hand)
 ```
 

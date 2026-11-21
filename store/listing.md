@@ -1,14 +1,14 @@
 # Chrome Web Store 上架資料
 
 把下面各欄位的內容複製到 Chrome 開發者後台（Developer Dashboard）對應的欄位。
-上傳的檔案：`dist/anyread-md-<版本>-store.zip`（用 `npx pnpm@9 run pack:store` 產生）。
+上傳的檔案：`dist/anyread-<版本>-store.zip`（用 `npx pnpm@9 run pack:store` 產生）。
 
 ---
 
 ## 1. Package（套件）
 
-上傳 `dist/anyread-md-<版本>-store.zip`。這個 zip 的根目錄就是 `manifest.json`，
-不要上傳給人手動安裝用的 `anyread-md-<版本>.zip`（那份多包了一層資料夾）。
+上傳 `dist/anyread-<版本>-store.zip`。這個 zip 的根目錄就是 `manifest.json`，
+不要上傳給人手動安裝用的 `anyread-<版本>.zip`（那份多包了一層資料夾）。
 
 ---
 
@@ -75,7 +75,7 @@ PRIVATE BY DESIGN
 SETUP
 To open local files, go to the extension's Details page and turn on "Allow access to file URLs". The welcome page after install walks you through it.
 
-Open source, based on md-reader 2.x (MIT License). Source code: https://github.com/kuotungtsai/AnyRead-MD
+Open source, based on md-reader 2.x (MIT License). Source code: https://github.com/kuotungtsai/AnyRead
 ```
 
 **Category**：`Developer Tools`
@@ -92,8 +92,8 @@ Open source, based on md-reader 2.x (MIT License). Source code: https://github.c
 **Additional fields**
 
 - Official URL：（可留空）
-- Homepage URL：`https://github.com/kuotungtsai/AnyRead-MD`
-- Support URL：`https://github.com/kuotungtsai/AnyRead-MD/issues`
+- Homepage URL：`https://github.com/kuotungtsai/AnyRead`
+- Support URL：`https://github.com/kuotungtsai/AnyRead/issues`
 
 ### 選填：新增「中文（繁體）」語言
 
@@ -144,7 +144,7 @@ AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔�
 使用前設定
 要開啟本機檔案，請到擴充功能的「詳細資料」開啟「允許存取檔案網址」。安裝後的歡迎頁會一步步帶你設定。
 
-開源專案，基於 md-reader 2.x（MIT 授權）修改。原始碼：https://github.com/kuotungtsai/AnyRead-MD
+開源專案，基於 md-reader 2.x（MIT 授權）修改。原始碼：https://github.com/kuotungtsai/AnyRead
 ```
 
 ---
@@ -206,7 +206,7 @@ All JavaScript is bundled in the package. No code is loaded from any server.
 **Privacy policy URL**
 
 ```
-https://github.com/kuotungtsai/AnyRead-MD/blob/main/PRIVACY.md
+https://github.com/kuotungtsai/AnyRead/blob/main/PRIVACY.md
 ```
 
 ---

@@ -3,7 +3,7 @@
     "message": "AnyRead – 浏览与阅读本地文件"
   },
   "ext_desc": {
-    "message": "在 Chrome 里浏览本地文件夹，直接查看 Markdown、CSV、Excel、Word、PowerPoint、JSON 等文件，还能编辑 Markdown。所有内容只在你的电脑上处理。"
+    "message": "在 Chrome 里浏览本地文件夹，直接查看文档、表格、演示文稿和 Markdown，还能编辑 Markdown。所有内容只在你的电脑上处理。"
   },
   "command_toggle_side": {
     "message": "切换侧边栏"

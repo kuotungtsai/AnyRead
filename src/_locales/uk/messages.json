@@ -3,7 +3,7 @@
     "message": "AnyRead – Browse & Read Local Files"
   },
   "ext_desc": {
-    "message": "Переглядайте локальні папки й читайте Markdown, CSV, Excel, Word, PowerPoint, JSON та інше в Chrome. Усе лишається у вас."
+    "message": "Переглядайте локальні папки й читайте документи, таблиці, слайди та Markdown просто в Chrome. Усе лишається у вас."
   },
   "command_toggle_side": {
     "message": "Перемкнути бічну панель"

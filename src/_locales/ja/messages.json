@@ -3,7 +3,7 @@
     "message": "AnyRead – ローカルファイルを閲覧"
   },
   "ext_desc": {
-    "message": "Chrome でローカルフォルダを閲覧し、Markdown・CSV・Excel・Word・PowerPoint・JSON などをそのまま表示。Markdown は編集も可能。すべてお使いのパソコン内で処理します。"
+    "message": "Chrome でローカルフォルダを閲覧し、文書・表・スライド・Markdown をそのまま表示。Markdown は編集も可能。すべてお使いのパソコン内で処理します。"
   },
   "command_toggle_side": {
     "message": "サイドバーの表示切り替え"

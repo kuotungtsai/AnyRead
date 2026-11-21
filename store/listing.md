@@ -25,13 +25,13 @@ AnyRead – Browse & Read Local Files
 **Summary**（manifest 的 description，132 字元內，自動帶入）
 
 ```
-Browse local folders and read Markdown, CSV, Excel, Word, PowerPoint, JSON and more in Chrome. Nothing leaves your computer.
+Browse local folders and read documents, spreadsheets, slides and Markdown right in Chrome. Nothing leaves your computer.
 ```
 
 **Description**
 
 ```
-AnyRead lets you browse the folders on your computer and read the files in them right in Chrome: Markdown, CSV and Excel tables, Word and PowerPoint, JSON, YAML and more, files Chrome would otherwise only download. Markdown files can be edited too. It is free, needs no account and never sends your files anywhere.
+AnyRead lets you browse the folders on your computer and read the files in them right in Chrome: Markdown documents, spreadsheets, Word and PowerPoint files and data files, many of which Chrome would otherwise only download. Markdown files can be edited too. It is free, needs no account and never sends your files anywhere.
 
 BROWSE A WHOLE FOLDER
 • Drag a folder into a normal tab to browse it: its files in the main column, the folder above on the left; files open right there
@@ -40,16 +40,16 @@ BROWSE A WHOLE FOLDER
 • "Files" tab in the side bar to switch between documents in the same folder
 
 READ
-• Open local .md / .markdown files (file://)
+• Open local Markdown files (file://)
 • Optional: also show Markdown files on web sites you allow (one site or all sites)
 • Light and dark themes, syntax-highlighted code, click-to-zoom images
 • Outline side bar to jump between headings
 • Auto refresh: the page updates when you save the file in your editor
 • Links to other Markdown files open in a pane on the right, next to what you are reading; drag the divider to resize it, go back and forward, or open the file in this tab or a new one
-• CSV and Excel (.xlsx) files show as tables, in the pane or on a table page with a Download button (Chrome would only download them)
-• Word (.docx) and PowerPoint (.pptx) files show their text: headings, lists, tables and pictures, and each slide with its speaker notes
-• JSON (pretty-printed), YAML, TOML, INI, .env and log files, and .gitignore, Dockerfile, Makefile and similar, shown highlighted
-• .txt files, code files and Mermaid diagrams (.mmd) open in the pane too
+• Spreadsheets show as tables, in the pane or on their own page with a Download button
+• Word and PowerPoint files show their text, tables and pictures, and each slide with its speaker notes
+• Data and settings files are shown with syntax highlighting; JSON is laid out to be readable
+• Plain text, code and diagram files open in the pane too
 • Font size, text width, line height and your own CSS
 • Export to PDF (print) or to a single HTML file
 
@@ -59,12 +59,11 @@ EDIT
 • Formatting buttons and shortcuts; paste a picture to save it next to the document
 
 RICH MARKDOWN
-• Mermaid diagrams (flowchart, sequence, class, state, Gantt and more)
-• KaTeX math, footnotes, task lists, callout boxes, emoji, tables with merged cells, YAML front matter
+• Mermaid diagrams
+• Math, footnotes, task lists, callout boxes and more
 • Turn each plugin on or off and fine-tune its options in Settings
 • .txt files are laid out as Markdown, keeping their line breaks
-• Open other text files you choose (e.g. .c, .py) as highlighted code
-• Mermaid files (.mmd) are drawn as a diagram
+• Show other text files you choose as highlighted code
 
 PRIVATE BY DESIGN
 • No account, no ads, no analytics, no tracking
@@ -100,7 +99,7 @@ Open source, based on md-reader 2.x (MIT License). Source code: https://github.c
 在 Store listing 右上角的語言選單新增 Chinese (Traditional)，貼上：
 
 ```
-AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔案：Markdown、CSV 和 Excel 表格、Word 和 PowerPoint、JSON、YAML 等，這些 Chrome 原本只會下載的檔案都能打開，Markdown 還能直接編輯。完全免費、不需要帳號，檔案也不會傳到任何地方。
+AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔案：Markdown 文件、試算表、Word 和 PowerPoint、資料檔，很多是 Chrome 原本只會下載的，Markdown 還能直接編輯。完全免費、不需要帳號，檔案也不會傳到任何地方。
 
 瀏覽整個資料夾
 • 把資料夾拖進一般分頁就能瀏覽：右邊是資料夾的檔案，左邊是上一層；點的檔案直接在右邊顯示
@@ -109,16 +108,16 @@ AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔�
 • 側邊欄「檔案」分頁，切換同資料夾的其他文件
 
 閱讀
-• 開啟本機的 .md / .markdown 檔（file://）
+• 開啟本機的 Markdown 檔（file://）
 • 選用：你允許的網站上的 Markdown 檔也能顯示（單一網站或所有網站）
 • 淺色 / 深色主題、程式碼上色、點圖片可放大
 • 側邊欄大綱，點標題就跳過去
 • 自動刷新：在編輯器存檔後，頁面自動更新
 • 連到其他 Markdown 檔的連結會在右半邊開啟，原本的文件留在左邊；可拖曳中間的分隔線調整寬度、回上一個 / 下一個，或改在這個分頁、新分頁開啟
-• CSV 和 Excel（.xlsx）檔顯示成表格，在右半邊或表格頁打開，表格頁有「下載」按鈕（Chrome 原本只會直接下載）
-• Word（.docx）和 PowerPoint（.pptx）檔顯示內容：標題、清單、表格、圖片，簡報每張投影片連同講者備註
-• JSON（自動排版）、YAML、TOML、INI、.env、log，以及 .gitignore、Dockerfile、Makefile 這類檔案，上色顯示
-• .txt、程式碼檔和 Mermaid 圖（.mmd）也能在右半邊打開
+• 試算表顯示成表格，在右半邊或獨立的頁面打開，有「下載」按鈕
+• Word 和 PowerPoint 檔顯示文字、表格、圖片，簡報每張投影片連同講者備註
+• 資料檔和設定檔上色顯示，JSON 會自動排版
+• 純文字、程式碼和圖表檔也能在右半邊打開
 • 可調整字體大小、內容寬度、行距，也能加自己的 CSS
 • 匯出成 PDF（列印）或單一 HTML 檔
 
@@ -128,12 +127,11 @@ AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔�
 • 格式工具列與快捷鍵；貼上圖片會存在文件旁邊
 
 豐富的 Markdown
-• Mermaid 圖表（流程圖、循序圖、類別圖、狀態圖、甘特圖等）
-• KaTeX 數學公式、註腳、核取清單、提示框、Emoji、合併儲存格表格、YAML 前置資料
+• Mermaid 圖表
+• 數學公式、註腳、核取清單、提示框等
 • 每個插件都能個別開關，並在設定頁調整參數
 • .txt 檔用 Markdown 排版，保留原本的換行
-• 自選其他文字檔（例如 .c、.py）以程式碼上色顯示
-• Mermaid 圖檔（.mmd）直接畫成圖
+• 自選其他文字檔，以程式碼上色顯示
 
 重視隱私
 • 沒有帳號、沒有廣告、沒有分析、不追蹤

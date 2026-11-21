@@ -9,6 +9,7 @@
 import { sanitizeExts } from './file-types'
 import { getReading } from './reading-config'
 
+/** the file's mark; the extension's old name, kept so older files still load */
 export const SETTINGS_APP = 'AnyRead MD'
 export const SETTINGS_KIND = 'settings'
 
@@ -121,7 +122,7 @@ export function readSettingsFile(
     file.kind !== SETTINGS_KIND ||
     !isObject(file.settings)
   ) {
-    throw new Error('not an AnyRead MD settings file')
+    throw new Error('not an AnyRead settings file')
   }
 
   const input = file.settings

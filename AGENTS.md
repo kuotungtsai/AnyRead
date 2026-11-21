@@ -1,6 +1,6 @@
 # Notes for coding agents
 
-AnyRead MD is a Chrome extension (Manifest V3) that reads, browses and edits
+AnyRead is a Chrome extension (Manifest V3) that reads, browses and edits
 Markdown files, and shows CSV, Excel, Word and PowerPoint files Chrome would
 only download. It is a fork of md-reader 2.x (MIT). What each folder holds is
 in the README ("專案結構", or [doc/en/README.md](doc/en/README.md) in English).

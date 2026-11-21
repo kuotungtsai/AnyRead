@@ -2,10 +2,10 @@
   "name": "anyread-md",
   "version": "1.3.0",
   "upstreamVersion": "2.12.12",
-  "author": "Bener (original md-reader), Gordon Tsai <kuotung.tsai@gmail.com> (AnyRead MD)",
+  "author": "Bener (original md-reader), Gordon Tsai (AnyRead)",
   "license": "MIT",
   "private": true,
-  "description": "AnyRead MD: read, browse and edit Markdown files locally in Chrome. Fork of md-reader 2.x (MIT).",
+  "description": "AnyRead: browse local folders and read Markdown, tables, Office documents and data files in Chrome. Fork of md-reader 2.x (MIT).",
   "keywords": [
     "markdown",
     "markdown reader",

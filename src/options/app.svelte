@@ -65,7 +65,7 @@
   let codeExts: string[] = []
   let codeExtsText = ''
   let codeExtsInvalid: string[] = []
-  /** the types AnyRead MD opens by itself, so nobody adds them again */
+  /** the types AnyRead opens by itself, so nobody adds them again */
   const builtInTypes = (l: typeof localize) =>
     [
       `Markdown (${MD_EXTS.join(', ')})`,

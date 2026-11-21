@@ -56,12 +56,12 @@ export function makeDemo(root, { workbook, reportDocx, deckPptx }) {
   }
   put(
     DEMO_MARK,
-    'Made by `pnpm demo` (AnyRead MD). Everything here is invented.\n',
+    'Made by `pnpm demo` (AnyRead). Everything here is invented.\n',
   )
 
   put(
     'README.md',
-    `# AnyRead MD demo
+    `# AnyRead demo
 
 A made-up team handbook with one example of every feature. Everything here is
 invented. Open this file in Chrome to read it, or open its folder for the

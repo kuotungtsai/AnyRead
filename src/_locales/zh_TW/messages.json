@@ -1,9 +1,9 @@
 {
   "ext_name": {
-    "message": "AnyRead MD"
+    "message": "AnyRead – 瀏覽與閱讀本機檔案"
   },
   "ext_desc": {
-    "message": "在 Chrome 裡閱讀、瀏覽、編輯 Markdown 檔案，支援資料夾瀏覽、圖表和公式，所有內容只在你的電腦上處理。"
+    "message": "在 Chrome 裡瀏覽本機資料夾，直接看 Markdown、CSV、Excel、Word、PowerPoint、JSON 等檔案，還能編輯 Markdown。所有內容只在你的電腦上處理。"
   },
   "command_toggle_side": {
     "message": "切換側邊欄"

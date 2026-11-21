@@ -1,6 +1,6 @@
 /**
  * Write the demo: a made-up team handbook with one example of every
- * feature (tests/e2e/demo.mjs), to try AnyRead MD.
+ * feature (tests/e2e/demo.mjs), to try AnyRead.
  *
  *   pnpm demo              into demo/ in this repository (ignored by git)
  *   pnpm demo <folder>     anywhere else
@@ -35,7 +35,7 @@ console.log(`Demo written to ${target}
 Try it:
   1. Load the extension: chrome://extensions, turn on Developer mode,
      "Load unpacked", choose ${ext}
-     (build it first: npx pnpm@9 build:extension; turn off another AnyRead MD
+     (build it first: npx pnpm@9 build:extension; turn off another AnyRead
      while you try this one)
   2. Open the demo's folder page:  ${pathToFileURL(target).href}/
      or its guide:                 ${

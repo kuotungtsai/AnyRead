@@ -3,7 +3,7 @@
  *
  * - Inside a hidden iframe created by md-reader (marked `#mdr-dir=<nonce>`):
  *   reads the listing and posts the entries back to the parent viewer page.
- * - As the top-level page: replaces the plain listing with AnyRead MD's
+ * - As the top-level page: replaces the plain listing with AnyRead's
  *   folder page: two columns. The main one lists a folder (filter, search
  *   inside files) or shows a file you pick, in a frame so the folder page
  *   stays; the left one lists the folder above it, as a tree.
@@ -165,7 +165,7 @@ async function topMode() {
   const data: any = await storage.get()
   if (data?.enable === false || data?.dirView === false) return showPage()
   const t = i18n(data?.language)
-  // Chrome writes the dates in the browser's language: use AnyRead MD's
+  // Chrome writes the dates in the browser's language: use AnyRead's
   let dateFormat: Intl.DateTimeFormat = null
   try {
     dateFormat = new Intl.DateTimeFormat(t.locale, {

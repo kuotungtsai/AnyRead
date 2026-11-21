@@ -60,7 +60,7 @@ export const CONFIG_NAMES: Record<string, string> = {
   licence: 'plaintext',
   codeowners: 'plaintext',
 }
-/** types AnyRead MD shows by itself; never registered again as code types */
+/** types AnyRead shows by itself; never registered again as code types */
 const BUILT_IN_EXTS = () => [
   ...MD_EXTS,
   ...DIAGRAM_EXTS,
@@ -222,7 +222,7 @@ export function textMatcher(codeExts: string[] = []) {
   return (name: string) => isPlainTextName(name) || !!codeTypeOf(name, codeExts)
 }
 
-/** matcher for file names AnyRead MD opens: markdown, tables, the user's code types */
+/** matcher for file names AnyRead opens: markdown, tables, the user's code types */
 export function viewableMatcher(codeExts: string[] = []) {
   const all = [
     ...MD_EXTS,

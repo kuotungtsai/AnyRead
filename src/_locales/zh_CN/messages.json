@@ -1,9 +1,9 @@
 {
   "ext_name": {
-    "message": "AnyRead MD"
+    "message": "AnyRead – 浏览与阅读本地文件"
   },
   "ext_desc": {
-    "message": "在 Chrome 里阅读、浏览、编辑 Markdown 文件，支持文件夹浏览、图表和公式，所有内容只在你的电脑上处理。"
+    "message": "在 Chrome 里浏览本地文件夹，直接查看 Markdown、CSV、Excel、Word、PowerPoint、JSON 等文件，还能编辑 Markdown。所有内容只在你的电脑上处理。"
   },
   "command_toggle_side": {
     "message": "切换侧边栏"

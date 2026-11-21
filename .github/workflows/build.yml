@@ -78,4 +78,4 @@ jobs:
             set -- --generate-notes
           fi
           gh release create "$GITHUB_REF_NAME" dist/*.zip \
-            --title "AnyRead MD $GITHUB_REF_NAME" "$@"
+            --title "AnyRead $GITHUB_REF_NAME" "$@"

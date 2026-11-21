@@ -1,10 +1,10 @@
 [English](./doc/en/README.md) | 繁體中文
 
-# AnyRead MD
+# AnyRead
 
-<img alt="AnyRead MD" src="./src/images/icon.svg" align="right" width="110">
+<img alt="AnyRead" src="./src/images/icon.svg" align="right" width="110">
 
-在 Chrome 裡閱讀、瀏覽、編輯 Markdown 檔案的瀏覽器擴充功能。
+在 Chrome 裡瀏覽本機資料夾、直接看裡面檔案的瀏覽器擴充功能：Markdown、CSV 與 Excel 表格、Word、PowerPoint、JSON、YAML 等 Chrome 原本只會下載的檔案都能打開，Markdown 還能直接編輯。
 所有內容都只在你的電腦上處理：**沒有帳號、沒有追蹤，也不會連到任何外部伺服器。**
 
 > Fork of the open-source [md-reader](https://github.com/md-reader/md-reader) 2.x (MIT).
@@ -13,7 +13,7 @@
 
 - **閱讀**：本機的 Markdown 檔（`.md`、`.markdown` 等）直接排版顯示；可切換深淺主題，程式碼會上色，點圖片可以放大。網站上的 Markdown 檔預設不處理，要自己開啟（見下方「網站存取」）。
 - **連結在右邊開啟**：點文件裡連到另一個 Markdown 檔、`.txt` 檔或你在設定頁加的程式碼檔（例如 `.py`）的連結，會在畫面右半邊開啟，原本的文件留在左邊。右邊再點連結會繼續在右邊開啟，上方有 ← → 可以回上一個、下一個（滑鼠側鍵也可以），「直接開啟」在這個分頁開啟右邊的檔案（取代左邊的文件，瀏覽器的上一頁可以回來），「在新分頁開啟」把它開到新分頁；其他檔案（圖片、PDF 等）和其他網站的連結會開在新分頁，不會蓋掉左邊的文件。拖曳兩邊中間的分隔線可以調整寬度（會記住），按兩下恢復各佔一半。按 `Esc` 關閉右邊。按住 `Ctrl` 再點就照一般方式開啟。可在設定頁關閉。
-- **CSV 與 Excel 表格**：Chrome 會直接下載 `.csv` 和 `.xlsx`，不會顯示。文件裡連到 CSV、TSV、Excel（`.xlsx`、`.xlsm`）的連結會在右半邊顯示成表格；「直接開啟」「在新分頁開啟」，或從資料夾檢視、側邊欄「檔案」點這些檔案，會開啟 AnyRead MD 的表格頁，上方有「下載」可以存下原始檔案。
+- **CSV 與 Excel 表格**：Chrome 會直接下載 `.csv` 和 `.xlsx`，不會顯示。文件裡連到 CSV、TSV、Excel（`.xlsx`、`.xlsm`）的連結會在右半邊顯示成表格；「直接開啟」「在新分頁開啟」，或從資料夾檢視、側邊欄「檔案」點這些檔案，會開啟 AnyRead 的表格頁，上方有「下載」可以存下原始檔案。
   - CSV：逗號、分號、Tab 分隔都能自動判斷；不是 UTF-8 的檔案（例如 Excel 存的 Big5）會改用介面語言常用的編碼讀取。
   - Excel：每個工作表一個分頁；顯示儲存格的值，日期、時間、百分比照 Excel 的格式顯示，其他格式（貨幣符號、顏色、合併儲存格、圖表）不顯示；公式顯示 Excel 上次存檔時算好的結果。不支援舊的 `.xls`。檔案在瀏覽器裡解析，沒有用到任何外部服務或套件。
   - 表格頁最多顯示 10,000 列，右側面板 1,000 列。檔案太大時不會整個讀進來，改顯示一行提示（右側面板 20 MB、表格頁 100 MB；`.xlsx` 的工作表解開後超過 64 MB）。直接在網址列開 `.csv`、`.xlsx` 仍會被 Chrome 下載，這點擴充沒辦法改。
@@ -53,7 +53,7 @@
 
 安裝後只會處理本機檔案，不會要求「讀取所有網站資料」的權限。要看網站上的 Markdown 檔時，有兩種開啟方式：
 
-- **只開一個網站**：在該網站打開 Markdown 檔，點工具列的 MD 圖示，選「在這個網站使用 AnyRead MD」。
+- **只開一個網站**：在該網站打開 Markdown 檔，點工具列的 AnyRead 圖示，選「在這個網站使用 AnyRead」。
 - **所有網站**：到設定頁的「網站」開啟「所有網站上的 Markdown 檔」。
 
 兩種都會由 Chrome 跳出確認視窗，之後可以在設定頁移除。
@@ -106,7 +106,7 @@ npx pnpm@9 run pack:store
 
 ### 版本號
 
-AnyRead MD 有自己的版本號，從 1.0.0 起算，採 [語意化版本](https://semver.org/lang/zh-TW/)（主.次.修），不沿用原專案 md-reader 的 2.x 版號。
+AnyRead 有自己的版本號，從 1.0.0 起算，採 [語意化版本](https://semver.org/lang/zh-TW/)（主.次.修），不沿用原專案 md-reader 的 2.x 版號。
 
 - 版本號只改 `package.json` 的 `version`；`pnpm run build`（`build:manifest`）會把它寫進 `src/manifest.json` 的 `version`。
 - 擴充裡顯示的版本就是單純的 `version`（例如 `1.0.1`）。參考的上游版本記在 `package.json` 的 `upstreamVersion`，只做紀錄，合併新的上游版本時記得一起更新。來源標示放在 `LICENSE`、`THIRD_PARTY_NOTICES.txt`、manifest 的 `author` 和 README。

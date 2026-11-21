@@ -44,7 +44,7 @@
   }
 
   /* The current tab is a Markdown file on a web site that is not allowed
-     yet: offer to turn AnyRead MD on for that site. */
+     yet: offer to turn AnyRead on for that site. */
   let sitePattern: string = null
   let siteTabId: number = null
   function checkSite() {

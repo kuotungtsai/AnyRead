@@ -9,6 +9,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import zlib from 'node:zlib'
 import { fileURLToPath } from 'node:url'
+import { makeDemo } from './demo.mjs'
 
 /** a zip file (deflate) from { name: text or bytes } */
 export function makeZip(files) {
@@ -626,6 +627,9 @@ export function makeFixtures(root) {
       '',
     ].join('\n'),
   )
+
+  // the demo (tests/e2e/demo.mjs): the same files `pnpm demo` writes
+  makeDemo(path.join(root, 'handbook'), { workbook, reportDocx, deckPptx })
 }
 
 if (
@@ -640,3 +644,6 @@ if (
   makeFixtures(path.resolve(root))
   console.log('fixtures written to', path.resolve(root))
 }
+
+// for scripts/demo.mjs
+export { workbook, reportDocx, deckPptx }

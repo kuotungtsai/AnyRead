@@ -16,7 +16,8 @@ npx pnpm@9 test:e2e csv office  # only these
 - **Windows**: the specs open real browser windows; leave them alone while
   they run (a few minutes in all).
 - **Files**: `fixtures.mjs` writes invented files into `.work/` before every
-  run (the tests change some of them). Screenshots and downloads go to
+  run (the tests change some of them). It also writes the demo there (`.work/handbook/`, from `demo.mjs`), the same
+  files `pnpm demo` writes for people to try. Screenshots and downloads go to
   `.work/out/`. Both folders are ignored by git.
 - **Result**: each spec prints `PASS` / `FAIL` lines; `run.mjs` prints a
   summary and exits with 1 when a spec failed.
@@ -57,6 +58,7 @@ the clicks are not. The specs keep real clicks on purpose.
 | `openhere`  | the pane's "Open here" and the browser's Back                                                  |
 | `anchors`   | `#heading` links written for GitHub; file names not turned into links                          |
 | `esc`       | Esc closes the pane, also from the folder page's tree                                          |
+| `demo`      | the demo (`pnpm demo`, `demo.mjs`): every file it links to, its folder page, hidden folder     |
 | `csv`       | CSV / TSV / Excel in the pane and on the table page; encodings; Download                       |
 | `review`    | other pages' frames left alone; size limits; the folder page's live theme                      |
 | `settings`  | saving and restoring the settings file                                                         |

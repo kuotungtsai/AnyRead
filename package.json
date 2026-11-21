@@ -21,6 +21,7 @@
     "test": "node tests/run.mjs",
     "test:e2e": "node tests/e2e/run.mjs",
     "check:private": "node scripts/check-private.mjs",
+    "demo": "node scripts/demo.mjs",
     "preinstall": "node ./scripts/preinstall.mjs",
     "prepare": "husky install",
     "pack:share": "webpack --config ./build/webpack.prod.js && node ./scripts/pack-share.mjs",

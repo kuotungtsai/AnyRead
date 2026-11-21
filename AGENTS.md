@@ -14,6 +14,7 @@ npx pnpm@9 test                        # unit tests (Node, no browser)
 npx pnpm@9 test:e2e                    # browser tests (needs the build above)
 npx pnpm@9 test:e2e folder office      # only some browser tests
 npx pnpm@9 run build                   # version into the manifest, build, dist/anyread-md-<version>.zip
+npx pnpm@9 demo                        # a made-up handbook with every feature, into demo/ (to try by hand)
 ```
 
 The browser tests load `extension/` into Chrome for Testing, downloaded once
@@ -37,14 +38,17 @@ were found by using the extension. So:
    nothing.
 3. **Look at the result.** For anything visible, open it in the browser or
    look at the screenshot, in light and dark themes. "Passed" is not enough.
-4. **Think through the cases that break things** whenever you touch nearby
+4. **Try it in the demo.** `pnpm demo` writes a made-up handbook with an
+   example of every feature; add one for a new feature to
+   `tests/e2e/demo.mjs` (the `demo` spec walks all of it).
+5. **Think through the cases that break things** whenever you touch nearby
    code: an empty folder, the top of a drive, very large files, non-ASCII
    names, dark theme, all five interface languages, Back / Forward, the
    split pane open while Esc is pressed, a file inside the folder page
    versus on its own tab, the pane turned off in Settings.
-5. **Do not change a test just to make it pass.** If a test must change
+6. **Do not change a test just to make it pass.** If a test must change
    because the design changed, say why in the commit.
-6. **Say what was not verified.** End with the parts no test or check
+7. **Say what was not verified.** End with the parts no test or check
    covered, so a person can look at them.
 
 ## No personal data in commits

@@ -40,6 +40,7 @@ const SPECS = {
   anchors: () => [w('anchors'), out('anchors')], // GitHub-style #heading links
   closemd: () => [w('histtest'), out('closemd')], // Close (Esc) for a file in the folder page
   cols: () => [w('cols'), out('cols')], // the folder page's two columns
+  demo: () => [w('handbook'), out('demo')], // the demo (pnpm demo) works end to end
   csv: () => [w('csvtest')], // CSV / TSV / Excel in the pane and on the table page
   esc: () => [w('demo'), out('esc')], // Esc closes the split pane
   flash: () => [w(path.join('histtest', 'withreadme')), out('flash')], // no flash of Chrome's listing

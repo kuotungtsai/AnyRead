@@ -10,3 +10,4 @@ extension.pem
 tests/.build/
 tests/e2e/.work/
 tests/e2e/.cache/
+/demo/

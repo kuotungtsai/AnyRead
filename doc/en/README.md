@@ -90,6 +90,9 @@ npx pnpm@9 test
 # Run the browser tests (build first; Chrome for Testing is downloaded once, see tests/e2e/README.md)
 npx pnpm@9 test:e2e
 
+# Write the demo (a made-up team handbook, one example of every feature) into demo/, or another folder
+npx pnpm@9 demo
+
 # Build and pack the zip to share: dist/anyread-md-<version>.zip
 npx pnpm@9 run pack:share
 

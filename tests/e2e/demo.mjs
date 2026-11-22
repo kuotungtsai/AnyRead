@@ -103,6 +103,7 @@ folder page.
 ## Folders
 
 - [Guides](guides/): a folder opens as the folder page. On the folder page, tick "Show hidden files" to see the \`.drafts\` folder.
+- Open this whole folder: it is a project. The left column shows its own folders only; open \`guides\` and the tree opens down to it. Click a folder above it in the path at the top to make that the project. "Browse all folders" in Settings brings back the folder above on the left.
 
 ## Other web sites
 

@@ -1,19 +1,12 @@
 import Ele from './ele'
 import className from '@/config/class-name'
 import type { DirEntry } from '@/dir-frame'
-import { isOfficeName, isPageName, parentFolder } from './file-types'
+import { isOfficeName, isPageName, parentFolder, rootHash } from './file-types'
 import { openTablePage } from './table-open'
 
 export const MD_EXT_RE = /\.(md|mdx|mkd|markdown)$/i
 
-/**
- * Name of the frame on the right of AnyRead's folder page. A frame keeps
- * its name while it moves from file to file, so a page can tell it is shown
- * there, and not inside some other page's frame (where AnyRead stays out).
- */
-export const FOLDER_FRAME = 'anyread-folder'
-export const inFolderFrame = () =>
-  window.top !== window && window.name === FOLDER_FRAME
+export { FOLDER_FRAME, inFolderFrame } from './folder-frame'
 
 /**
  * List a file:// directory by loading Chrome's directory listing page in a
@@ -156,8 +149,10 @@ export function createFileTree(
     const li = new Ele<HTMLElement>('li', {
       className: entry.isDir ? className.FILES_DIR : className.FILES_FILE,
     })
+    // a folder's page keeps the folder at the top of this tab as its
+    // project root, so its left column shows what this tab shows
     const link = new Ele<HTMLElement>('a', {
-      href: entry.url,
+      href: entry.isDir ? entry.url + rootHash(entry.url, rootDir) : entry.url,
       title: entry.name,
     })
     link.style.paddingLeft = `${1.2 + depth * 0.9}em`

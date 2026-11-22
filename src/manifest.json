@@ -1,6 +1,6 @@
 {
   "name": "__MSG_ext_name__",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": "Gordon Tsai (based on md-reader by Bener, MIT)",
   "manifest_version": 3,
   "description": "__MSG_ext_desc__",
@@ -163,6 +163,29 @@
       "matches": ["file:///*/"],
       "js": ["js/dir-frame.js"],
       "css": ["css/dir-frame.css"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "file://*/*.png",
+        "file://*/*.jpg",
+        "file://*/*.jpeg",
+        "file://*/*.gif",
+        "file://*/*.webp",
+        "file://*/*.svg",
+        "file://*/*.bmp",
+        "file://*/*.avif",
+        "file://*/*.PNG",
+        "file://*/*.JPG",
+        "file://*/*.JPEG",
+        "file://*/*.GIF",
+        "file://*/*.WEBP",
+        "file://*/*.SVG",
+        "file://*/*.BMP",
+        "file://*/*.AVIF"
+      ],
+      "js": ["js/raw-frame.js"],
       "all_frames": true,
       "run_at": "document_idle"
     }

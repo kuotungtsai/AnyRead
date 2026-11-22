@@ -164,3 +164,29 @@ test('the manifest opens every built-in data / settings type and named file', as
     )
   }
 })
+
+test('project root in the folder page address', async () => {
+  const { rootFromHash, rootHash, isInside } = await import(
+    './.build/file-types.mjs'
+  )
+  const here = 'file:///C:/p/docs/guide/'
+  assert.equal(rootFromHash(here, ''), here)
+  assert.equal(rootFromHash(here, '#root=../'), 'file:///C:/p/docs/')
+  assert.equal(rootFromHash(here, '#root=../../'), 'file:///C:/p/')
+  // past the top of the drive, or anything else: the folder itself
+  assert.equal(rootFromHash(here, '#root=../../../../'), here)
+  assert.equal(rootFromHash(here, '#root=sub/'), here)
+  assert.equal(rootFromHash(here, '#root=..'), here)
+  assert.equal(rootFromHash(here, '#mdr-dir=x'), here)
+  assert.equal(rootHash(here, here), '')
+  assert.equal(rootHash(here, 'file:///C:/p/'), '#root=../../')
+  assert.equal(rootHash(here, 'file:///C:/other/'), '')
+  // round trip, names with spaces and non-ASCII letters
+  const deep = 'file:///C:/my%20notes/%E8%B3%87%E6%96%99/a/'
+  const top = 'file:///C:/my%20notes/'
+  assert.equal(rootFromHash(deep, rootHash(deep, top)), top)
+  assert.ok(isInside(deep, top))
+  assert.ok(isInside(top, top))
+  assert.ok(!isInside(top, deep))
+  assert.ok(!isInside('file:///C:/p2/', 'file:///C:/p/'))
+})

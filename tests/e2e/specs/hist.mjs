@@ -136,7 +136,11 @@ try {
   ok(true, 'Forward: the xlsx again')
 
   // 2. Close button -> list; Esc in the table page -> list; Esc with the tree focused -> list
-  await fr().click('#close')
+  // the table page is an extension page in a frame, where puppeteer cannot
+  // always place a mouse click: click the button from inside it
+  await fr()
+    .evaluate(() => document.querySelector('#close').click())
+    .catch(() => {})
   await waitFor(isList, 'close')
   ok(true, 'Close: back to the list')
   await tree('data.csv')

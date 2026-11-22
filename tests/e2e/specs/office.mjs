@@ -226,7 +226,11 @@ try {
   )
   ok(true, 'report.docx in the folder page, with Close')
   await page.screenshot({ path: `${outDir}/docx-folder.png` })
-  await fr().click('#close')
+  // the table page is an extension page in a frame, where puppeteer cannot
+  // always place a mouse click: click the button from inside it
+  await fr()
+    .evaluate(() => document.querySelector('#close').click())
+    .catch(() => {})
   await waitFor(
     () => page.evaluate(() => !document.querySelector('.mdr-scroll').hidden),
     'closed',

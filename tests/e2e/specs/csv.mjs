@@ -305,10 +305,13 @@ try {
       break
     await sleep(200)
   }
+  // the table page is an extension page in a frame, where puppeteer cannot
+  // always place a mouse click: click the button from inside it
   await page
     .frames()
     .find(f => f.name() === 'anyread-folder')
-    .click('#close') // back to the file list
+    .evaluate(() => document.querySelector('#close').click()) // back to the file list
+    .catch(() => {})
   await page.waitForFunction(
     () => !document.querySelector('.mdr-scroll').hidden,
     { timeout: 5000 },

@@ -646,7 +646,7 @@ async function topMode() {
       if (newRoot) showRoot(next.root)
       if (next.dir !== cur) showDir(next.dir)
       else if (newRoot) renderHead()
-      if (!newRoot) openPath(next.dir)
+      if (!newRoot) openPath(next.shown || next.dir)
       updateUp()
       if (next.shown) {
         if (next.shown !== shown || frame.hidden) loadFrame(next.shown)
@@ -918,13 +918,16 @@ async function topMode() {
         return
       }
       renderTree(tree, items, 0)
-      await openPath(cur)
+      await openPath(shown || cur)
     }
-    /** open the folders between the root and dir in the tree, so dir shows */
+    /** open the folders between the root and dir (a folder or a file) in
+     * the tree, so dir shows there */
     async function openPath(dir: string) {
       if (!dir || !isInside(dir, root)) return
       const chain: string[] = []
-      for (let d = parentOf(dir); d && !same(d, root); d = parentOf(d)) {
+      // a file's own folder, or a folder's parent
+      const first = dir.endsWith('/') ? parentOf(dir) : new URL('./', dir).href
+      for (let d = first; d && !same(d, root); d = parentOf(d)) {
         if (!isInside(d, root)) return
         chain.unshift(d)
       }
@@ -934,6 +937,11 @@ async function topMode() {
         await openers.get(key(d))?.()
       }
       markShown()
+      // in a long tree the folder may be far down: bring it into view
+      if (run !== rootRun || !same(dir, shown || cur)) return
+      tree.querySelectorAll<HTMLAnchorElement>('a[data-url]').forEach(a => {
+        if (same(a.dataset.url, dir)) a.scrollIntoView({ block: 'nearest' })
+      })
     }
     function markShown() {
       tree.querySelectorAll<HTMLAnchorElement>('a[data-url]').forEach(a => {

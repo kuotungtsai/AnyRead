@@ -619,6 +619,13 @@ export function makeFixtures(root) {
       '\n',
   )
 
+  // manytree: a project with many folders, one of them deep, for the left
+  // column to scroll to the folder it marks
+  for (let i = 0; i < 40; i++) {
+    put(`manytree/f${String(i).padStart(2, '0')}/a.md`, '# A\n')
+  }
+  put('manytree/f30/inner/deep/d.md', '# Deep\n')
+
   // escraw: pictures and a real (drawn) PDF, which Chrome shows itself
   put('escraw/pic.png', PNG)
   put(

@@ -70,3 +70,44 @@ test('words of your own, plain or as a regular expression', () => {
   )
   assert.deepEqual(findProblems('nothing here', words), [])
 })
+
+test('network share paths are blocked, escaped paths in code are not', () => {
+  const bs = String.fromCharCode(92) // a backslash
+  assert.deepEqual(rules(bs + bs + 'fileserver' + bs + 'team' + bs + 'a.md'), [
+    'network share path',
+  ])
+  assert.deepEqual(rules('see ' + bs + bs + 'nas01' + bs + 'docs'), [
+    'network share path',
+  ])
+  // a C: path written in a JS string (each backslash doubled) is not a share
+  assert.deepEqual(rules('C:' + bs + bs + 'docs' + bs + bs + 'a'), [])
+  assert.deepEqual(rules('a regex: /[' + bs + bs + '/]+/'), [])
+})
+
+test('paths on drives E: to Z: are blocked, C: and D: are fine', () => {
+  const bs = String.fromCharCode(92) // a backslash
+  assert.deepEqual(rules('Z' + ':' + bs + 'dev' + bs + 'notes.md'), [
+    'path on a drive E: to Z:',
+  ])
+  assert.deepEqual(rules('file:///' + 'E' + ':/share/a.md'), [
+    'path on a drive E: to Z:',
+  ])
+  assert.deepEqual(
+    rules('C:' + bs + 'docs' + bs + 'a.md and D:/tools/anyread'),
+    [],
+  )
+  // a drive on its own, words ending in a letter and a colon
+  assert.deepEqual(rules('the top of a drive (such as Z' + ':)'), [])
+  assert.deepEqual(rules('file:///docs and type: /x/'), [])
+})
+
+test('internal domains in addresses are blocked', () => {
+  assert.deepEqual(rules('https://wiki.' + 'corp/page'), ['internal domain'])
+  assert.deepEqual(rules('http://build-01.' + 'local:8080'), [
+    'internal domain',
+  ])
+  assert.deepEqual(rules('smb://nas.home.' + 'arpa/x'), ['internal domain'])
+  // code, not an address
+  assert.deepEqual(rules('chrome.storage.local.get()'), [])
+  assert.deepEqual(rules('https://example.com/local'), [])
+})

@@ -2,7 +2,8 @@
  * Keep personal data out of commits. Checks the added lines and file names
  * of a change, and commit messages, for things no public repository should
  * get: home folders with a user name in them, e-mail addresses, private
- * network addresses, keys and tokens. Words of your own (an employer, a
+ * network addresses, network share paths, paths on drives E: to Z:,
+ * internal domain names, keys and tokens. Words of your own (an employer, a
  * customer, internal project names) go in a file that is never committed:
  *
  *   <git dir>/sensitive-words.txt   one word or /regular expression/ a line,
@@ -40,6 +41,21 @@ export const RULES = [
   {
     name: 'private network address',
     re: /\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})\b/,
+  },
+  {
+    // two backslashes, a server and a share: a company share, most of the time
+    name: 'network share path',
+    re: /(?<![:\w\\])\\\\[A-Za-z0-9][A-Za-z0-9._$-]*\\[A-Za-z0-9._$ -]+/,
+  },
+  {
+    // E:\ to Z:\ are mapped network drives or work disks more often than not;
+    // examples use C: or D:
+    name: 'path on a drive E: to Z:',
+    re: /\b[E-Ze-z]:[\\/]+[^\s'"`<>|*?]+/,
+  },
+  {
+    name: 'internal domain',
+    re: /\b(?:https?|ftp|smb|file|wss?):\/\/(?:[^\s/'"@]*@)?[A-Za-z0-9.-]+\.(?:local|internal|corp|lan|intranet|home\.arpa)\b/i,
   },
   {
     name: 'key or token',

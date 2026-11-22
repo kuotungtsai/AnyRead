@@ -56,7 +56,9 @@ were found by using the extension. So:
 This repository is public. Every commit runs `scripts/check-private.mjs`
 (husky `pre-commit` and `commit-msg` hooks): it blocks home folders with a
 user name in them, e-mail addresses (other than no-reply and example ones),
-private network addresses, keys and tokens, in added lines, file names and
+private network addresses, network share paths (two backslashes, a server, a share), paths on
+drives E: to Z: (use C: or D: in examples), internal domains (`.local`,
+`.corp`, `.internal` ...), keys and tokens, in added lines, file names and
 the commit message. Words of the owner's own (an employer, internal names)
 are in `<git dir>/sensitive-words.txt`, which is never committed; when the
 file is there they are blocked too.

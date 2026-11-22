@@ -197,6 +197,8 @@ async function topMode() {
   /** files the right side shows: ours, plus pictures and PDFs Chrome shows */
   const showable = (name: string) =>
     isViewable(name) || /\.(png|jpe?g|gif|webp|svg|bmp|avif|pdf)$/i.test(name)
+  /** files shown by an AnyRead page (not Chrome's picture or PDF viewer) */
+  const ownPage = (url: string) => isViewable(url) || isPageName(url)
   /** what the frame loads for a file: CSV / Excel go to the table page */
   const frameSrc = (url: string) =>
     isPageName(url) ? tablePageUrl(chrome.runtime.getURL(''), url) : url
@@ -518,9 +520,13 @@ async function topMode() {
     document.addEventListener('keydown', e => {
       if (scroll.hidden) {
         // a file is shown: the keys belong to it. Esc pressed with the tree
-        // focused goes to it too (it closes its pane, or the file)
+        // focused goes to it too (it closes its pane, or the file). A
+        // picture or PDF is Chrome's own page, with nobody there to hear
+        // it: Esc goes back to the list from here.
         if (e.key === 'Escape') {
-          frame.contentWindow?.postMessage({ type: 'anyread:esc' }, '*')
+          if (ownPage(shown))
+            frame.contentWindow?.postMessage({ type: 'anyread:esc' }, '*')
+          else go({ dir: cur, left: leftDir, shown: '' })
         }
         return
       }
@@ -563,6 +569,28 @@ async function topMode() {
     const scroll = el('div', { class: 'mdr-scroll' })
     scroll.append(view, pick)
     main.append(frame, scroll)
+    // Chrome's PDF viewer takes the keyboard as it opens, and no script of
+    // ours runs in it: keep the keys here, so Esc still goes back to the
+    // list (a click in the PDF gives them to it)
+    let pdfOpened = 0
+    const keepKeys = () => {
+      if (
+        /\.pdf$/i.test(shown) &&
+        Date.now() - pdfOpened < 3000 &&
+        document.activeElement === frame
+      ) {
+        frame.blur()
+        window.focus()
+      }
+    }
+    frame.addEventListener('load', () => {
+      if (!/\.pdf$/i.test(shown)) return
+      pdfOpened = Date.now()
+      keepKeys()
+    })
+    // the viewer takes the keyboard once it has drawn the file, a moment
+    // after the frame has loaded
+    window.addEventListener('blur', () => setTimeout(keepKeys, 0))
 
     // Our own moves replace the frame's document (no history entry of its
     // own); links followed inside the frame add theirs.

@@ -13,6 +13,7 @@ module.exports = {
     popup: resolve(__dirname, '../src/popup/index.ts'),
     options: resolve(__dirname, '../src/options/index.ts'),
     'dir-frame': resolve(__dirname, '../src/dir-frame.ts'),
+    'raw-frame': resolve(__dirname, '../src/raw-frame.ts'),
     table: resolve(__dirname, '../src/table/index.ts'),
   },
   output: {

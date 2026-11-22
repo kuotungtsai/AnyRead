@@ -43,6 +43,7 @@ const SPECS = {
   demo: () => [w('handbook'), out('demo')], // the demo (pnpm demo) works end to end
   csv: () => [w('csvtest')], // CSV / TSV / Excel in the pane and on the table page
   esc: () => [w('demo'), out('esc')], // Esc closes the split pane
+  escraw: () => [w('escraw'), out('escraw')], // Esc for a picture or PDF in the folder page
   flash: () => [w(path.join('histtest', 'withreadme')), out('flash')], // no flash of Chrome's listing
   folder: () => [w('demo'), w('demo2'), out('folder')], // folder page: files, .txt, sub folders
   filesup: () => [w('demo'), out('filesup')], // the side bar's Files tab: ↑ stops at the drive

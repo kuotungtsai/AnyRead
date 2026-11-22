@@ -336,6 +336,32 @@ function deckPptx() {
 
 /* ---------- all of it ---------- */
 
+/** a small valid PDF: one page with a line of text */
+function samplePdf(text) {
+  const stream = `BT /F1 24 Tf 72 720 Td (${text}) Tj ET`
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  ]
+  let out = '%PDF-1.4\n'
+  const offsets = []
+  objs.forEach((o, i) => {
+    offsets.push(out.length)
+    out += `${i + 1} 0 obj\n${o}\nendobj\n`
+  })
+  const xref = out.length
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`
+  for (const off of offsets)
+    out += `${String(off).padStart(10, '0')} 00000 n \n`
+  out += `trailer\n<< /Size ${
+    objs.length + 1
+  } /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`
+  return out
+}
+
 export function makeFixtures(root) {
   fs.rmSync(root, { recursive: true, force: true })
   const put = (rel, value) => {
@@ -592,6 +618,15 @@ export function makeFixtures(root) {
       all.map(n => `- [${n}](${encodeURI(n)})`).join('\n') +
       '\n',
   )
+
+  // escraw: pictures and a real (drawn) PDF, which Chrome shows itself
+  put('escraw/pic.png', PNG)
+  put(
+    'escraw/shape.svg',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><rect width="80" height="40" fill="#3a7"/></svg>\n',
+  )
+  put('escraw/doc.pdf', samplePdf('Made-up PDF for the Esc test'))
+  put('escraw/a.md', '# A\n\nA plain page.\n')
 
   // mathtest: every way GitHub writes math, and code that only looks like it
   put(

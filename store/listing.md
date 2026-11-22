@@ -34,7 +34,7 @@ Browse local folders and read documents, spreadsheets, slides and Markdown right
 AnyRead lets you browse the folders on your computer and read the files in them right in Chrome: Markdown documents, spreadsheets, Word and PowerPoint files and data files, many of which Chrome would otherwise only download. Markdown files can be edited too. It is free, needs no account and never sends your files anywhere.
 
 BROWSE A WHOLE FOLDER
-• Drag a folder into a normal tab to browse it: its files in the main column, the folder above on the left; files open right there
+• Drag a folder into a normal tab to open it as a project: its own folders as a tree on the left, the folder you are in on the right; files open right there
 • Type to filter, ↑ ↓ to select, Enter to open
 • Search inside the files of the folder
 • "Files" tab in the side bar to switch between documents in the same folder
@@ -102,7 +102,7 @@ Open source, based on md-reader 2.x (MIT License). Source code: https://github.c
 AnyRead 讓你在 Chrome 裡瀏覽電腦上的資料夾，直接看裡面的檔案：Markdown 文件、試算表、Word 和 PowerPoint、資料檔，很多是 Chrome 原本只會下載的，Markdown 還能直接編輯。完全免費、不需要帳號，檔案也不會傳到任何地方。
 
 瀏覽整個資料夾
-• 把資料夾拖進一般分頁就能瀏覽：右邊是資料夾的檔案，左邊是上一層；點的檔案直接在右邊顯示
+• 把資料夾拖進一般分頁，就當成一個專案打開：左邊是專案裡的資料夾樹，右邊是你所在的資料夾；點的檔案直接在右邊顯示
 • 打字篩選、↑ ↓ 選擇、Enter 開啟
 • 可搜尋資料夾裡所有檔案的內容
 • 側邊欄「檔案」分頁，切換同資料夾的其他文件

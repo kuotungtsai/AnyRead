@@ -26,6 +26,7 @@ export const SETTINGS_KEYS = [
   'dirShowAll',
   'dirShowHidden',
   'dirSideHidden',
+  'dirExplore',
   'linkPreview',
   'previewWidth',
   'recentOn',
@@ -45,6 +46,7 @@ const BOOLEANS = [
   'dirShowAll',
   'dirShowHidden',
   'dirSideHidden',
+  'dirExplore',
   'linkPreview',
   'recentOn',
 ]

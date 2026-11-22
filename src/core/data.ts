@@ -41,6 +41,9 @@ export interface Data {
   dirShowHidden?: boolean
   /** folder view: the left column hidden, remembered across reloads */
   dirSideHidden?: boolean
+  /** folder view: the left column lists the folder above (off: the folder
+   * opened is a project, and the left column is its own tree) */
+  dirExplore?: boolean
   /** first-run tutorial has been shown */
   tourDone?: boolean
   /** set once saved plugin lists include NEW_PLUGINS decisions */

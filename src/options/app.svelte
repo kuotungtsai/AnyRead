@@ -115,6 +115,7 @@
   let customCss = ''
   let linkPreview = true
   let recentOn = true
+  let dirExplore = false
   const CSS_EXAMPLE = 'h1 { color: teal !important; }'
   const READING_FIELDS: Array<[keyof Reading, string, number]> = [
     ['fontSize', 'opt_font_size', 1],
@@ -141,6 +142,11 @@
   async function toggleLinkPreview() {
     linkPreview = !linkPreview
     await storage.set('linkPreview', linkPreview)
+    flash(localize('opt_saved'))
+  }
+  async function toggleDirExplore() {
+    dirExplore = !dirExplore
+    await storage.set('dirExplore', dirExplore)
     flash(localize('opt_saved'))
   }
   async function toggleRecent() {
@@ -177,6 +183,7 @@
       customCss = data.customCss || ''
       linkPreview = data.linkPreview !== false
       recentOn = data.recentOn !== false
+      dirExplore = data.dirExplore === true
       texts = Object.fromEntries(
         CONFIGURABLE.map(name => {
           const opts = config.plugins[name]
@@ -539,6 +546,21 @@
         aria-checked={recentOn}
         aria-label={localize('opt_recent')}
         on:click={toggleRecent}><span></span></button
+      >
+    </div>
+    <div class="row">
+      <div class="text">
+        <div class="name">{localize('opt_dir_explore')}</div>
+        <div class="desc">{localize('opt_dir_explore_desc')}</div>
+      </div>
+      <button
+        class="switch"
+        class:on={dirExplore}
+        role="switch"
+        aria-checked={dirExplore}
+        aria-label={localize('opt_dir_explore')}
+        data-opt="dirExplore"
+        on:click={toggleDirExplore}><span></span></button
       >
     </div>
   </section>

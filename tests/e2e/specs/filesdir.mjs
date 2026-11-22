@@ -87,16 +87,31 @@ try {
   b = await subBoxes()
   await page.mouse.click(b.name.x, b.name.y)
   await page
-    .waitForFunction(() => location.href.endsWith('/sub/'), { timeout: 8000 })
+    .waitForFunction(() => location.pathname.endsWith('/sub/'), {
+      timeout: 8000,
+    })
     .catch(() => {})
   await page.waitForSelector('.mdr-app', { timeout: 8000 }).catch(() => {})
+  await page
+    .waitForFunction(
+      () => document.querySelector('.mdr-side-head b')?.textContent,
+      { timeout: 8000 },
+    )
+    .catch(() => {})
   const folder = await page.evaluate(() => ({
-    url: location.href.split('/').slice(-2).join('/'),
+    url: location.pathname.split('/').slice(-2).join('/'),
+    hash: location.hash,
     main: document.querySelector('.mdr-view h1')?.textContent || '',
+    root: document.querySelector('.mdr-side-head b')?.textContent || '',
   }))
+  // the folder at the top of the Files tab (demo) is the page's project
   ok(
-    folder.url === 'sub/' && folder.main === 'sub',
-    'the name opens the folder page of sub: ' + JSON.stringify(folder),
+    folder.url === 'sub/' &&
+      folder.main === 'sub' &&
+      folder.hash === '#root=../' &&
+      folder.root === 'demo',
+    'the name opens the folder page of sub, demo as its root: ' +
+      JSON.stringify(folder),
   )
   await page.goBack().catch(() => {})
   await page
@@ -108,7 +123,7 @@ try {
   await openTab()
   b = await subBoxes()
   const newTab = browser
-    .waitForTarget(t => t.url().endsWith('/sub/'), { timeout: 6000 })
+    .waitForTarget(t => /\/sub\/(#.*)?$/.test(t.url()), { timeout: 6000 })
     .catch(() => null)
   await page.keyboard.down('Control')
   await page.mouse.click(b.name.x, b.name.y)

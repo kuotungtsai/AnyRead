@@ -350,3 +350,43 @@ export function parentFolder(dir: string): string | null {
   }
   return new URL('../', url.href.replace(/[?#].*$/, '')).href
 }
+
+/** a folder address without what follows # or ?, decoded, to compare two */
+const folderKey = (url: string) => {
+  const u = url.replace(/[?#].*$/, '')
+  try {
+    return decodeURIComponent(u)
+  } catch {
+    return u
+  }
+}
+
+/** true when dir is root or a folder inside it */
+export function isInside(dir: string, root: string): boolean {
+  return !!dir && !!root && folderKey(dir).startsWith(folderKey(root))
+}
+
+/**
+ * The folder page's project root, kept in its address as how many folders
+ * up it is: file:///C:/p/docs/#root=../ has the root C:/p/. Nothing after
+ * the # (or anything else there) means the folder itself.
+ */
+export function rootFromHash(here: string, hash: string): string {
+  const m = /^#root=((?:\.\.\/)+)$/.exec(hash || '')
+  if (!m) return here
+  let root = here
+  for (let n = m[1].length / 3; n > 0; n--) {
+    root = parentFolder(root)
+    if (!root) return here
+  }
+  return root
+}
+
+/** the end of the address that keeps root as here's project root */
+export function rootHash(here: string, root: string): string {
+  if (!isInside(here, root)) return ''
+  const depth = (u: string) =>
+    new URL(u).pathname.split('/').filter(Boolean).length
+  const n = depth(here) - depth(root)
+  return n > 0 ? '#root=' + '../'.repeat(n) : ''
+}

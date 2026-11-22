@@ -72,12 +72,11 @@ try {
   const page = await browser.newPage()
   page.on('pageerror', e => errors.push(e.message))
 
-  // 1. folder with a README: its list in the main column, the folder above on the left
+  // 1. folder with a README: its list in the main column, its own tree on
+  // the left (the folder opened is the project)
   await page.goto(`${base}/`)
   await page.waitForSelector('.mdr-list a .mdr-name', { timeout: 8000 })
-  await page.waitForFunction(() => !!document.querySelector('.mdr-tree a.on'), {
-    timeout: 8000,
-  })
+  await page.waitForSelector('.mdr-tree ul a', { timeout: 8000 })
   const names = await page.$$eval('.mdr-list a .mdr-name', l =>
     l.map(a => a.textContent),
   )
@@ -91,14 +90,17 @@ try {
     list: !document.querySelector('.mdr-scroll').hidden,
     frame: !document.querySelector('.mdr-frame').hidden,
     left: document.querySelector('.mdr-side-head b').textContent,
-    on: document.querySelector('.mdr-tree a.on')?.textContent,
+    tree: [...document.querySelectorAll('.mdr-tree > ul > li > a')].map(a =>
+      a.textContent.slice(1),
+    ),
   }))
   ok(
     first.list &&
       !first.frame &&
-      first.left === parentName &&
-      first.on?.endsWith('demo'),
-    'folder with a README opens on its list; left = the folder above, demo marked: ' +
+      first.left === 'demo' &&
+      first.tree.includes('sub') &&
+      first.tree.includes('README.md'),
+    'folder with a README opens on its list; left = the own tree of demo: ' +
       JSON.stringify(first),
   )
   await clickTree(page, 'README.md')
@@ -317,30 +319,39 @@ try {
     frame: !document.querySelector('.mdr-frame').hidden,
   }))
   ok(noReadme.list && !noReadme.frame, 'no README: the list is shown')
-  // 11. the tree's "Parent folder" item opens the folder above
+  // 11. "Parent folder" only below the project's top: none at demo itself;
+  // in sub it goes back to demo, on the same page
   await page.goto(`${base}/`)
-  await page.waitForSelector('.mdr-tree a')
+  await page.waitForSelector('.mdr-tree ul a')
   const items = await page.$$eval('.mdr-tree > a', l =>
     l.map(a => a.textContent),
   )
   ok(
-    items.length === 1 && items[0].endsWith('上一層資料夾'),
-    'tree head: ' + items.join(' | '),
+    items.length === 0,
+    'no "Parent folder" at the project top: ' + items.join(' | '),
+  )
+  await page.evaluate(() =>
+    [...document.querySelectorAll('.mdr-list a')]
+      .find(a => a.querySelector('.mdr-name').textContent === 'sub')
+      .click(),
+  )
+  await page.waitForFunction(
+    () =>
+      document.querySelector('.mdr-view h1')?.textContent === 'sub' &&
+      document
+        .querySelector('.mdr-tree > a')
+        ?.textContent.endsWith('上一層資料夾'),
+    { timeout: 8000 },
   )
   await page.evaluate(() => document.querySelector('.mdr-tree > a').click())
   await page.waitForFunction(
-    n => document.querySelector('.mdr-view h1')?.textContent === n,
+    () => document.querySelector('.mdr-view h1')?.textContent === 'demo',
     { timeout: 8000 },
-    parentName,
   )
   ok(
     page.url().endsWith('/demo/') &&
-      (await page.$eval(
-        '.mdr-side-head b',
-        (b, n) => b.textContent !== n,
-        parentName,
-      )),
-    'parent folder: main = the fixtures folder, left one level higher, same page',
+      (await page.$eval('.mdr-side-head b', b => b.textContent)) === 'demo',
+    'in sub, "Parent folder": back to demo, left stays demo, same page',
   )
   await page.goto(`${base}/`)
   await page.waitForSelector('.mdr-tree a')

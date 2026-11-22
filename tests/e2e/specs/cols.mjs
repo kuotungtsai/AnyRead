@@ -1,5 +1,7 @@
-// Folder page in two columns: the main column lists a folder (or shows a
-// file), the left column lists the folder above it.
+// Folder page as a project: the folder you open is the root. The left
+// column is that folder's tree (never the folders around it); the main
+// column lists the folder you are in, or shows a file. Going up stops at
+// the root; a breadcrumb above it opens that folder as the new root.
 import puppeteer from '../browser.mjs'
 import { pathToFileURL } from 'node:url'
 import fs from 'fs'
@@ -56,27 +58,26 @@ try {
       const mainList =
         !document.querySelector('.mdr-scroll').hidden &&
         !document.querySelector('.mdr-view').hidden
+      const text = a => a.querySelector('span:last-child').textContent
       return {
         left: document.querySelector('.mdr-side-head b').textContent,
         up: !!document.querySelector('.mdr-tree > a'),
         leftItems: [
           ...document.querySelectorAll('.mdr-tree > ul > li > a'),
-        ].map(a => a.textContent.slice(1)),
-        on: [...document.querySelectorAll('.mdr-tree a.on')].map(a =>
-          a.textContent.slice(1),
-        ),
+        ].map(text),
+        tree: [...document.querySelectorAll('.mdr-tree ul a')].map(text),
+        on: [...document.querySelectorAll('.mdr-tree a.on')].map(text),
         main: mainList
           ? document.querySelector('.mdr-view h1').textContent
           : document.querySelector('.mdr-frame').hidden
-          ? document.querySelector('.mdr-pick').hidden
-            ? '?'
-            : 'PICK'
+          ? '?'
           : 'FILE',
         mainItems: mainList
           ? [...document.querySelectorAll('.mdr-list a .mdr-name')].map(
               s => s.textContent,
             )
           : [],
+        hash: location.hash,
       }
     })
   const is = want => async () => {
@@ -89,25 +90,30 @@ try {
     page.evaluate(
       n =>
         [...document.querySelectorAll('.mdr-tree a')]
-          .find(a => a.textContent.slice(1) === n)
+          .find(a => a.querySelector('span:last-child').textContent === n)
           .querySelector('span:last-child')
           .click(),
       name,
     )
-  const arrowClick = name =>
-    page.evaluate(
-      n =>
-        [...document.querySelectorAll('.mdr-tree a')]
-          .find(a => a.textContent.slice(1) === n)
-          .querySelector('.mdr-tree-icon')
-          .click(),
-      name,
+  // waits for the entry: the list fills in a moment after a folder opens
+  const mainClick = async name => {
+    await waitFor(
+      async () => (await cols()).mainItems.includes(name),
+      'main item ' + name,
     )
-  const mainClick = name =>
-    page.evaluate(
+    await page.evaluate(
       n =>
         [...document.querySelectorAll('.mdr-list a')]
           .find(a => a.querySelector('.mdr-name').textContent === n)
+          .click(),
+      name,
+    )
+  }
+  const crumb = name =>
+    page.evaluate(
+      n =>
+        [...document.querySelectorAll('.mdr-crumbs a')]
+          .find(a => a.textContent === n)
           .click(),
       name,
     )
@@ -119,26 +125,41 @@ try {
         .trim(),
     )
 
-  // 1. open top/A/: main = A, left = top with A marked, ↰ there
-  await page.goto(`${base}/top/A/`)
+  // 1. open top/: it is the root. Left = top's own tree, no ↰, nothing
+  // from the folder around it
+  await page.goto(`${base}/top/`)
   await page.waitForSelector('.mdr-app')
-  await waitFor(is({ left: 'top', main: 'A', on: ['A'] }), 'start')
+  await waitFor(is({ left: 'top', main: 'top' }), 'start')
+  await waitFor(async () => (await cols()).leftItems.length === 4, 'tree')
   const c1 = await cols()
   ok(
-    c1.up &&
+    !c1.up &&
       c1.leftItems.join() === 'A,B,data.csv,t.md' &&
-      c1.mainItems.join() === 'sub,a1.md,a2.md',
-    'start: main lists A, left lists top (the folder above), A marked: ' +
+      c1.mainItems.join() === 'A,B,t.md,data.csv' &&
+      c1.hash === '',
+    'start: left is top itself (A, B, data.csv, t.md), no ↰: ' +
       JSON.stringify(c1),
   )
   await page.screenshot({ path: `${outDir}/cols-start.png` })
 
-  // 2. a folder in the main column: one level down, left follows
+  // 2. down into A, then sub: the left stays top, the way there opens
+  await mainClick('A')
+  await waitFor(is({ left: 'top', main: 'A', on: ['A'], up: true }), 'A')
   await mainClick('sub')
-  await waitFor(is({ left: 'A', main: 'sub', on: ['sub'] }), 'down to sub')
-  ok(true, 'main folder click: main = sub, left = A, sub marked')
+  await waitFor(
+    is({ left: 'top', main: 'sub', on: ['sub'], up: true }),
+    'down to sub',
+  )
+  const c2 = await cols()
+  ok(
+    c2.tree.join() === 'A,sub,a1.md,a2.md,B,data.csv,t.md',
+    'down to A/sub: left stays top, A opened to show sub (marked): ' +
+      JSON.stringify(c2.tree),
+  )
+  await page.screenshot({ path: `${outDir}/cols-deep.png` })
 
-  // 3. a file on the left: shown in the main column; Esc back to sub's list
+  // 3. a file in the tree: shown in the main column; its link opens the
+  // pane; Esc (pane, then file) back to sub's list
   await leftClick('a1.md')
   await waitFor(
     async () =>
@@ -148,11 +169,10 @@ try {
   )
   const c3 = await cols()
   ok(
-    c3.left === 'A' && c3.on.includes('a1.md'),
-    'left file click: file in the main column, left stays A: ' +
+    c3.left === 'top' && c3.on.includes('a1.md'),
+    'tree file click: the file on the right, left stays top: ' +
       JSON.stringify(c3.on),
   )
-  // link inside the file still opens the split pane
   const h = await fr().$('.md-reader__markdown-content a[href$="a2.md"]')
   const b = await h.boundingBox()
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2)
@@ -170,56 +190,63 @@ try {
   await page.keyboard.press('Escape') // pane
   await sleep(400)
   await page.keyboard.press('Escape') // file
-  await waitFor(is({ left: 'A', main: 'sub' }), 'esc back to sub')
+  await waitFor(is({ left: 'top', main: 'sub' }), 'esc back to sub')
   ok(true, 'Esc (pane, then file): back to the sub list')
 
-  // 4. Back steps through: file, sub list, then A
+  // 4. Back steps through: file, sub, A, top; the left stays top
   await page.goBack()
   await waitFor(async () => (await cols()).main === 'FILE', 'back to file')
   await page.goBack()
-  await waitFor(is({ left: 'A', main: 'sub' }), 'back to sub')
+  await waitFor(is({ left: 'top', main: 'sub' }), 'back to sub')
   await page.goBack()
   await waitFor(is({ left: 'top', main: 'A' }), 'back to A')
-  ok(true, 'Back: file, then the sub list, then A with top on the left')
+  await page.goBack()
+  await waitFor(is({ left: 'top', main: 'top', up: false }), 'back to top')
+  ok(true, 'Back: file, sub, A, then top; the left stays top')
 
-  // 5. a folder on the left: main shows it, left stays
+  // 5. a folder in the tree opens in the main column; ↰ goes up, and
+  // stops at the root
   await leftClick('B')
-  await waitFor(is({ left: 'top', main: 'B', on: ['B'] }), 'B')
-  ok(true, 'left folder click: main = B, left stays top')
-
-  // 6. ▸ expands in the tree only; a folder inside it opens in the main column, left stays
-  await arrowClick('A')
-  await waitFor(
-    () =>
-      page.evaluate(() =>
-        [...document.querySelectorAll('.mdr-tree a')].some(
-          a => a.textContent.slice(1) === 'sub',
-        ),
-      ),
-    'expanded',
-  )
-  ok((await cols()).main === 'B', '▸ expands A in the tree; main still B')
-  await leftClick('sub')
-  await waitFor(is({ left: 'top', main: 'sub' }), 'deep sub')
-  ok(true, 'folder inside the expanded tree: main = sub, left stays top')
-
-  // 7. ↰ on the left: both columns move up
+  await waitFor(is({ left: 'top', main: 'B', on: ['B'], up: true }), 'B')
   await page.evaluate(() => document.querySelector('.mdr-tree > a').click())
-  await waitFor(is({ left: 'cols', main: 'top', on: ['top'] }), 'up')
-  ok(true, '↰: main = top, left = cols')
+  await waitFor(is({ left: 'top', main: 'top', up: false }), 'up to top')
+  ok(true, 'tree folder B, then ↰: back to top, and no ↰ at the root')
 
-  // 8. breadcrumb: that folder, its parent on the left
+  // 6. a breadcrumb inside the project: that folder, same root
   await mainClick('A')
-  await waitFor(is({ left: 'top', main: 'A' }), 'A again')
-  await page.evaluate(() =>
-    [...document.querySelectorAll('.mdr-crumbs a')]
-      .find(a => a.textContent === 'top')
-      .click(),
+  await waitFor(is({ main: 'A' }), 'A again')
+  await crumb('top')
+  await waitFor(is({ left: 'top', main: 'top', hash: '' }), 'crumb top')
+  ok(true, 'breadcrumb "top" (the root): main = top, left stays top')
+
+  // 7. a breadcrumb above the root: that folder becomes the root, and
+  // the address keeps it, so a reload keeps it too
+  await crumb('cols')
+  await waitFor(
+    is({ left: 'cols', main: 'cols', leftItems: ['top'], hash: '#root=../' }),
+    'crumb cols',
   )
-  await waitFor(is({ left: 'cols', main: 'top' }), 'crumb top')
-  ok(true, 'breadcrumb "top": main = top, left = cols')
+  ok(true, 'breadcrumb above the root ("cols"): cols is the new root')
+  await page.reload()
+  await page.waitForSelector('.mdr-app')
+  await waitFor(is({ left: 'cols', main: 'top', on: ['top'] }), 'reload')
+  ok(true, 'reload: root cols kept, top listed and marked')
+
+  // 8. an address with the root in it: that root, that folder
+  await page.goto(`${base}/top/A/sub/#root=../../`)
+  await page.waitForSelector('.mdr-app')
+  await waitFor(is({ left: 'top', main: 'sub', on: ['sub'] }), 'root in url')
+  ok(true, 'top/A/sub/#root=../../: left = top, sub listed and marked')
+  // a root that is not above the folder is ignored
+  await page.goto(`${base}/top/A/#root=sub/`)
+  await page.waitForSelector('.mdr-app')
+  await waitFor(is({ left: 'A', main: 'A', up: false }), 'bad root')
+  ok(true, 'a root that is not above the folder is ignored')
 
   // 9. a CSV in the main list: table page, its Close back to the list
+  await page.goto(`${base}/top/`)
+  await page.waitForSelector('.mdr-app')
+  await waitFor(is({ main: 'top' }), 'top again')
   await mainClick('data.csv')
   await waitFor(
     () =>
@@ -229,37 +256,27 @@ try {
     'csv',
   )
   await fr().click('#close')
-  await waitFor(is({ left: 'cols', main: 'top' }), 'csv closed')
-  ok(true, 'CSV in the main column; Close back to top')
+  await waitFor(is({ left: 'top', main: 'top' }), 'csv closed')
+  ok(true, 'CSV on the right; Close back to top')
 
-  // 10. the top of a drive: the drive on the left, nothing picked in the main column
+  // 10. the top of a drive: the drive is the root, listed on both sides
   if (process.platform !== 'win32') console.log('SKIP drive root (not Windows)')
   else {
     // Windows only; checks the page's structure and prints no file names
     const drive = (process.env.SystemDrive || 'C:').replace(/[\\/]$/, '')
     await page.goto(`file:///${drive}/`)
     await page.waitForSelector('.mdr-app')
-    await sleep(1500)
-    {
-      const c = await cols()
-      console.log(
-        'root view:',
-        JSON.stringify({
-          left: c.left,
-          up: c.up,
-          main: c.main,
-          nLeft: c.leftItems.length,
-          nMain: c.mainItems.length,
-        }),
-      )
-    }
     await waitFor(async () => {
       const c = await cols()
       return (
-        c.main === 'PICK' && c.left === drive && !c.up && c.leftItems.length > 0
+        c.left === drive &&
+        c.main === drive &&
+        !c.up &&
+        c.leftItems.length > 0 &&
+        c.mainItems.length > 0
       )
     }, 'root')
-    ok(true, `drive root: left = ${drive}, no ↰, main says to pick something`)
+    ok(true, `drive root: ${drive} on both sides, no ↰`)
   }
 } catch (e) {
   fail++
@@ -271,6 +288,7 @@ try {
         await (await browser.pages()).at(-1).evaluate(() => ({
           left: document.querySelector('.mdr-side-head b')?.textContent,
           h1: document.querySelector('.mdr-view h1')?.textContent,
+          hash: location.hash,
         })),
       ),
     )

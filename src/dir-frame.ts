@@ -4,9 +4,11 @@
  * - Inside a hidden iframe created by md-reader (marked `#mdr-dir=<nonce>`):
  *   reads the listing and posts the entries back to the parent viewer page.
  * - As the top-level page: replaces the plain listing with AnyRead's
- *   folder page: two columns. The main one lists a folder (filter, search
- *   inside files) or shows a file you pick, in a frame so the folder page
- *   stays; the left one lists the folder above it, as a tree.
+ *   folder page, which treats the folder opened as a project: the left
+ *   column is that folder's tree (its root), the main one lists the folder
+ *   you are in (filter, search inside files) or shows a file you pick, in a
+ *   frame so the folder page stays. Going up stops at the root; a
+ *   breadcrumb above it makes that folder the root.
  *
  * Nothing is sent anywhere else.
  */
@@ -17,8 +19,11 @@ import {
   isMarkdownName,
   isOfficeName,
   isPageName,
+  isInside,
   isTableName,
   parentFolder,
+  rootFromHash,
+  rootHash,
   viewableMatcher,
 } from '@/core/file-types'
 import { openTablePage } from '@/core/table-open'
@@ -124,7 +129,8 @@ body.mdr-dir > :not(.mdr-app){display:none !important}
 .mdr-meta.size{width:80px;text-align:right}.mdr-meta.date{width:170px;text-align:right}
 .mdr-empty{padding:16px;color:var(--sub);font-size:14px}
 .mdr-hint{margin-top:10px;font-size:12px;color:var(--sub)}
-.mdr-pick{padding:48px 32px;color:var(--sub);font-size:14px;text-align:center}
+.mdr-crumbs a.mdr-out{opacity:.7}
+.mdr-side-head b{cursor:pointer}
 .mdr-tree .mdr-folder .mdr-tree-icon{cursor:pointer;border-radius:4px}
 .mdr-tree .mdr-folder .mdr-tree-icon:hover{background:var(--line);color:var(--fg)}
 .mdr-results{margin-top:14px}
@@ -246,27 +252,31 @@ async function topMode() {
       return listings.get(url)
     }
 
-    // What the page shows: the folder listed in the main column (cur; ''
-    // = none yet, at the top of a drive), the folder on the left (always the
-    // one above cur, unless a folder was picked on the left), and a file
-    // shown in the main column instead of cur's list. Kept in the page's
-    // history entry, so Back and Forward step through it.
+    // What the page shows: the project's root (its tree on the left), the
+    // folder listed in the main column (cur, the root or a folder inside
+    // it), and a file shown in the main column instead of cur's list. Kept
+    // in the page's history entry, so Back and Forward step through it; the
+    // root is in the address too (#root=../), so a reload keeps it.
     interface View {
+      root: string
       dir: string
-      left: string
       shown: string
     }
+    let root = ''
     let cur = ''
     let curEntries: DirEntry[] = []
-    let leftDir = ''
     let shown = ''
-    /** a folder opened afresh: listed in the main column, its parent on the left */
-    const viewFor = (dir: string): View => {
-      const up = parentOf(dir)
-      return up
-        ? { dir, left: up, shown: '' }
-        : { dir: '', left: dir, shown: '' }
-    }
+    // "Browse all folders" (Settings): the left column is the folder above
+    // the one listed, as AnyRead had it before, and going up has no end
+    const explore = data?.dirExplore === true
+    /** a folder opened afresh: with explore, its parent on the left */
+    const fresh = (dir: string): View =>
+      explore
+        ? { root: parentOf(dir) || dir, dir, shown: '' }
+        : { root: dir, dir, shown: '' }
+    /** a folder inside the one listed: with explore, the left follows */
+    const into = (dir: string): View =>
+      explore ? { root: cur, dir, shown: '' } : { root, dir, shown: '' }
 
     /* ----- main column: a folder's list ----- */
     const view = el('div', { class: 'mdr-view' })
@@ -459,7 +469,8 @@ async function topMode() {
       })
     }
 
-    // breadcrumb: file:///C:/a/b/  ->  C: / a / b (each opens that folder here)
+    // breadcrumb: file:///C:/a/b/  ->  C: / a / b (each opens that folder
+    // here; one above the root opens it as the project)
     function renderHead() {
       crumbs.textContent = ''
       const parts = pathParts(cur)
@@ -467,7 +478,12 @@ async function topMode() {
         const href = new URL('/' + parts.slice(0, i + 1).join('/') + '/', cur)
           .href
         if (i) crumbs.append(' / ')
-        crumbs.append(el('a', { href }, decode(part)))
+        const a = el('a', { href }, decode(part))
+        if (!explore && !isInside(href, root)) {
+          a.classList.add('mdr-out')
+          a.title = t('dir_open_as_root')
+        }
+        crumbs.append(a)
       })
       title.textContent = dirName(cur)
     }
@@ -483,8 +499,6 @@ async function topMode() {
       results.textContent = ''
       filter.value = ''
       selected = 0
-      view.hidden = !dir
-      pick.hidden = !!dir
       if (!dir) return
       renderHead()
       list.textContent = ''
@@ -526,7 +540,7 @@ async function topMode() {
         if (e.key === 'Escape') {
           if (ownPage(shown))
             frame.contentWindow?.postMessage({ type: 'anyread:esc' }, '*')
-          else go({ dir: cur, left: leftDir, shown: '' })
+          else go({ root, dir: cur, shown: '' })
         }
         return
       }
@@ -541,7 +555,7 @@ async function topMode() {
       } else if (e.key === 'Enter' && links[selected]) {
         e.preventDefault()
         const href = (links[selected] as HTMLAnchorElement).href
-        if (href.endsWith('/')) go({ dir: href, left: cur, shown: '' })
+        if (href.endsWith('/')) go(into(href))
         else if (openEntry(href, e)) return
         else if (isPageName(href)) openTablePage(href, e.ctrlKey || e.metaKey)
         else location.href = href
@@ -557,7 +571,6 @@ async function topMode() {
     })
 
     view.append(crumbs, title, bar, list, hint, results)
-    const pick = el('div', { class: 'mdr-pick' }, t('dir_pick'))
 
     /* ----- main column: a file in a frame, or a folder's list ----- */
     const main = el('section', { class: 'mdr-main' })
@@ -567,7 +580,7 @@ async function topMode() {
       name: FOLDER_FRAME,
     })
     const scroll = el('div', { class: 'mdr-scroll' })
-    scroll.append(view, pick)
+    scroll.append(view)
     main.append(frame, scroll)
     // Chrome's PDF viewer takes the keyboard as it opens, and no script of
     // ours runs in it: keep the keys here, so Esc still goes back to the
@@ -607,11 +620,13 @@ async function topMode() {
         frame.src = src // the first load replaces the empty frame
       } else frame.contentWindow.location.replace(src)
     }
-    const current = (): View => ({ dir: cur, left: leftDir, shown })
+    const current = (): View => ({ root, dir: cur, shown })
     const remember = (push: boolean) => {
       const state = { ...history.state, anyreadView: current() }
-      if (push) history.pushState(state, '')
-      else history.replaceState(state, '')
+      // the address keeps the root (#root=../ when it is above this page)
+      const url = explore ? here : here + rootHash(here, root)
+      if (push) history.pushState(state, '', url)
+      else history.replaceState(state, '', url)
     }
 
     /** show a view; push = a step of its own in the browser's history */
@@ -619,17 +634,20 @@ async function topMode() {
       const now = current()
       if (
         push &&
+        now.root === next.root &&
         now.dir === next.dir &&
-        now.left === next.left &&
         now.shown === next.shown
       ) {
         if (!next.shown && !view.hidden) filter.focus()
         return
       }
-      if (next.left !== leftDir) showLeft(next.left)
+      // the root first: the breadcrumb marks the folders above it
+      const newRoot = next.root !== root
+      if (newRoot) showRoot(next.root)
       if (next.dir !== cur) showDir(next.dir)
-      view.hidden = !next.dir
-      pick.hidden = !!next.dir
+      else if (newRoot) renderHead()
+      if (!newRoot) openPath(next.dir)
+      updateUp()
       if (next.shown) {
         if (next.shown !== shown || frame.hidden) loadFrame(next.shown)
         shown = next.shown
@@ -645,19 +663,19 @@ async function topMode() {
         scroll.hidden = false
         if (!view.hidden) filter.focus()
       }
-      document.title = dirName(cur || leftDir)
+      document.title = dirName(cur)
       markShown()
       remember(push)
     }
     window.addEventListener('popstate', e => {
       const v = e.state?.anyreadView
-      if (v && typeof v.left === 'string') go(v, false)
+      if (v && typeof v.root === 'string') go(v, false)
     })
     window.addEventListener('message', e => {
       if (e.source !== frame.contentWindow) return
       // the file's Close button (or Esc): back to the folder's list
       if (e.data?.type === 'anyread:close') {
-        return go({ dir: cur, left: leftDir, shown: '' })
+        return go({ root, dir: cur, shown: '' })
       }
       // a file opened inside the frame: the tree marks it
       if (e.data?.type !== 'anyread:shown') return
@@ -686,7 +704,7 @@ async function topMode() {
         else window.open(url, '_blank', 'noopener')
         return true
       }
-      go({ dir: cur, left: leftDir, shown: url })
+      go({ root, dir: cur, shown: url })
       return true
     }
     // in the main column: a folder goes one level down (the left column
@@ -699,14 +717,20 @@ async function topMode() {
       if (a.closest('.mdr-crumbs')) {
         if (newTab(e)) return
         e.preventDefault()
-        go(viewFor(a.href))
+        // inside the project: that folder; above it: that folder's project
+        const dir = a.href
+        go(
+          !explore && isInside(dir, root)
+            ? { root, dir, shown: '' }
+            : fresh(dir),
+        )
         return
       }
       if (!a.closest('.mdr-list, .mdr-results')) return
       if (a.href.endsWith('/')) {
         if (newTab(e)) return // a folder page of its own in a new tab
         e.preventDefault()
-        go({ dir: a.href, left: cur, shown: '' })
+        go(into(a.href))
         return
       }
       if (openEntry(a.href.split('#')[0], e)) e.preventDefault()
@@ -719,7 +743,7 @@ async function topMode() {
       if (openEntry(a.href.split('#')[0], e)) e.preventDefault()
     })
 
-    /* ----- left column: the folder above, as a tree ----- */
+    /* ----- left column: the project's tree, from its root ----- */
     const side = el('aside', { class: 'mdr-side' })
     const head = el('div', { class: 'mdr-side-head' })
     const headName = el('b')
@@ -745,6 +769,8 @@ async function topMode() {
     showBtn.addEventListener('click', () => setSide(false))
     const tree = el('nav', { class: 'mdr-tree' })
     side.append(head, tree)
+    // the root's name lists the root
+    headName.addEventListener('click', () => go({ root, dir: root, shown: '' }))
 
     const treeLink = (
       icon: string,
@@ -792,29 +818,37 @@ async function topMode() {
         if (e.isDir) {
           a.classList.add('mdr-folder')
           let children: HTMLElement = null
-          const toggle = async () => {
-            const open = !children || children.hidden
+          let loading: Promise<void> = null
+          /** open or close the folder here in the tree; resolves once listed */
+          const setOpen = async (open: boolean) => {
             a.firstElementChild.textContent = open ? '▾' : '▸'
             if (children) {
               children.hidden = !open
+              if (open) await loading
               return
             }
+            if (!open) return
             children = el('div')
             li.append(children)
-            try {
-              renderTree(children, await readDir(e.url), depth + 1)
-            } catch {
-              children.append(
-                el('div', { class: 'mdr-empty' }, t('files_error')),
-              )
-            }
+            loading = (async () => {
+              try {
+                renderTree(children, await readDir(e.url), depth + 1)
+              } catch {
+                children.append(
+                  el('div', { class: 'mdr-empty' }, t('files_error')),
+                )
+              }
+            })()
+            await loading
           }
+          openers.set(key(e.url), () => setOpen(true))
           // ▸ opens the folder here in the tree; its name, in the main column
           a.addEventListener('click', ev => {
             if (ev.shiftKey || ev.altKey || newTab(ev)) return
             ev.preventDefault()
-            if ((ev.target as HTMLElement).closest('.mdr-tree-icon')) toggle()
-            else go({ dir: e.url, left: leftDir, shown: '' })
+            if ((ev.target as HTMLElement).closest('.mdr-tree-icon'))
+              setOpen(!children || children.hidden)
+            else go({ root, dir: e.url, shown: '' })
           })
         } else {
           a.addEventListener('click', ev => {
@@ -831,24 +865,44 @@ async function topMode() {
       markShown()
     }
 
-    /** list a folder on the left, with "up one level" above it */
-    let leftRun = 0
-    async function showLeft(dir: string) {
-      const run = ++leftRun
-      leftDir = dir
+    /** folders in the tree by address, each with a way to open it there */
+    const key = (url: string) => decode(url.split('#')[0])
+    const openers = new Map<string, () => Promise<void>>()
+
+    // "up one level" above the tree. In a project, while the main column
+    // is below the root: it moves the main column up, never past the root.
+    // With explore: both columns move up, to the top of the drive.
+    const upTarget = (): string | null => {
+      if (explore) return parentOf(root)
+      const up = cur && !same(cur, root) ? parentOf(cur) : null
+      return up && isInside(up, root) ? up : null
+    }
+    const upItem = treeLink('↰', t('dir_up'), '')
+    upItem.addEventListener('click', ev => {
+      if (newTab(ev)) return
+      ev.preventDefault()
+      const up = upTarget()
+      if (!up) return
+      go(explore ? fresh(root) : { root, dir: up, shown: '' })
+    })
+    function updateUp() {
+      const up = upTarget()
+      if (up) {
+        upItem.href = up
+        if (tree.firstChild !== upItem) tree.prepend(upItem)
+      } else upItem.remove()
+    }
+
+    /** the project's tree on the left, opened down to the folder listed */
+    let rootRun = 0
+    async function showRoot(dir: string) {
+      const run = ++rootRun
+      root = dir
       headName.textContent = dirName(dir)
       headName.title = decode(dir)
       tree.textContent = ''
-      const up = parentOf(dir)
-      if (up) {
-        const upItem = treeLink('↰', t('dir_up'), up)
-        upItem.addEventListener('click', ev => {
-          if (newTab(ev)) return
-          ev.preventDefault()
-          go(viewFor(leftDir))
-        })
-        tree.append(upItem)
-      }
+      openers.clear()
+      updateUp()
       const wait = el('div', { class: 'mdr-empty' }, t('preview_loading'))
       tree.append(wait)
       let items: DirEntry[]
@@ -857,13 +911,29 @@ async function topMode() {
       } catch {
         items = null
       }
-      if (run !== leftRun) return
+      if (run !== rootRun) return
       wait.remove()
       if (!items) {
         tree.append(el('div', { class: 'mdr-empty' }, t('files_error')))
         return
       }
       renderTree(tree, items, 0)
+      await openPath(cur)
+    }
+    /** open the folders between the root and dir in the tree, so dir shows */
+    async function openPath(dir: string) {
+      if (!dir || !isInside(dir, root)) return
+      const chain: string[] = []
+      for (let d = parentOf(dir); d && !same(d, root); d = parentOf(d)) {
+        if (!isInside(d, root)) return
+        chain.unshift(d)
+      }
+      const run = rootRun
+      for (const d of chain) {
+        if (run !== rootRun) return
+        await openers.get(key(d))?.()
+      }
+      markShown()
     }
     function markShown() {
       tree.querySelectorAll<HTMLAnchorElement>('a[data-url]').forEach(a => {
@@ -871,20 +941,14 @@ async function topMode() {
         a.classList.toggle('on', same(u, shown) || same(u, cur))
       })
     }
-    allBox.addEventListener('change', () => {
-      const d = leftDir
-      leftDir = ''
-      showLeft(d)
-    })
+    allBox.addEventListener('change', () => showRoot(root))
     hiddenBox.addEventListener('change', () => {
       showHidden = hiddenBox.checked
       storage.set('dirShowHidden', showHidden)
       files = null // search inside files again, with or without them
       render()
       queueSearch()
-      const d = leftDir
-      leftDir = ''
-      showLeft(d)
+      showRoot(root)
     })
 
     const app = el('div', { class: 'mdr-app' })
@@ -893,9 +957,14 @@ async function topMode() {
     document.body.append(app)
     showPage()
 
-    // the folder opened: listed in the main column, the one above on the
-    // left (at the top of a drive: the drive on the left, nothing picked yet)
-    go(viewFor(here), false)
+    // the folder opened is the project, unless the address names a root
+    // above it (from the Files tab, or a reload after a breadcrumb)
+    go(
+      explore
+        ? fresh(here)
+        : { root: rootFromHash(here, location.hash), dir: here, shown: '' },
+      false,
+    )
   })
 }
 

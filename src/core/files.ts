@@ -1,7 +1,7 @@
 import Ele from './ele'
 import className from '@/config/class-name'
 import type { DirEntry } from '@/dir-frame'
-import { isOfficeName, isPageName, parentFolder } from './file-types'
+import { isOfficeName, isPageName, parentFolder, rootHash } from './file-types'
 import { openTablePage } from './table-open'
 
 export const MD_EXT_RE = /\.(md|mdx|mkd|markdown)$/i
@@ -149,8 +149,10 @@ export function createFileTree(
     const li = new Ele<HTMLElement>('li', {
       className: entry.isDir ? className.FILES_DIR : className.FILES_FILE,
     })
+    // a folder's page keeps the folder at the top of this tab as its
+    // project root, so its left column shows what this tab shows
     const link = new Ele<HTMLElement>('a', {
-      href: entry.url,
+      href: entry.isDir ? entry.url + rootHash(entry.url, rootDir) : entry.url,
       title: entry.name,
     })
     link.style.paddingLeft = `${1.2 + depth * 0.9}em`

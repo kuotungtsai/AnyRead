@@ -243,6 +243,36 @@ try {
   await waitFor(is({ left: 'A', main: 'A', up: false }), 'bad root')
   ok(true, 'a root that is not above the folder is ignored')
 
+  // 8b. many folders: the tree scrolls to the deep folder it marks
+  const many = new URL('../manytree/', base + '/').href
+  await page.goto(`${many}f30/inner/deep/#root=../../../`)
+  await page.waitForSelector('.mdr-app')
+  await waitFor(is({ left: 'manytree', main: 'deep', on: ['deep'] }), 'many')
+  await sleep(400)
+  const seen = await page.evaluate(() => {
+    const r = document.querySelector('.mdr-tree a.on').getBoundingClientRect()
+    const box = document.querySelector('.mdr-tree').getBoundingClientRect()
+    return r.top >= box.top && r.bottom <= box.bottom
+  })
+  ok(seen, 'many folders: the marked deep folder is scrolled into view')
+
+  // 8c. a file opened from a folder the tree has not opened: the tree
+  // opens that folder and marks the file
+  await page.goto(`${base}/top/A/#root=../`)
+  await page.waitForSelector('.mdr-app')
+  await waitFor(is({ left: 'top', main: 'A' }), 'A in top')
+  await mainClick('a1.md')
+  await waitFor(
+    async () => (await cols()).on.includes('a1.md'),
+    'a1 marked in the tree',
+  ).catch(() => {})
+  const c8 = await cols()
+  ok(
+    c8.on.includes('a1.md') && c8.tree.includes('a1.md'),
+    'a file shown: the tree opens its folder and marks it: ' +
+      JSON.stringify(c8.on),
+  )
+
   // 9. a CSV in the main list: table page, its Close back to the list
   await page.goto(`${base}/top/`)
   await page.waitForSelector('.mdr-app')
